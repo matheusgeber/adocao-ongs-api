@@ -6,3 +6,88 @@ datasource db {
   provider = "postgresql"
   url = env("DATABASE_URL")
 }
+
+enum Perfil {
+  ADMIN
+  ONG
+  ADOTANTE
+  VOLUNTARIO
+}
+
+enum PorteAnimal {
+  PEQUENO
+  MEDIO
+  GRANDE
+}
+
+enum StatusAdocao {
+  EM_ANALISE
+  APROVADA
+  REJEITADA
+  CONCLUIDA
+}
+
+model Usuario {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  senha     String
+  perfil    Perfil   @default(ADOTANTE)
+  ativo     Boolean  @default(true)
+  criadoEm  DateTime @default(now())
+  
+  ong       Ong?
+  adotante  Adotante?
+}
+
+model Ong {
+  id        String   @id @default(uuid())
+  nome      String
+  cnpj      String   @unique
+  telefone  String
+  usuarioId String   @unique
+  usuario   Usuario  @relation(fields: [usuarioId], references: [id])
+  
+  animais   Animal[]
+}
+
+model Adotante {
+  id                    String   @id @default(uuid())
+  nome                  String
+  cpf                   String   @unique
+  telefone              String
+  pontuacaoQuestionario Int      @default(0)
+  bloqueado             Boolean  @default(false)
+  usuarioId             String   @unique
+  usuario               Usuario  @relation(fields: [usuarioId], references: [id])
+  
+  adocoes               Adocao[]
+}
+
+model Animal {
+  id          String      @id @default(uuid())
+  nome        String
+  especie     String
+  raca        String?
+  porte       PorteAnimal
+  idadeMeses  Int
+  disponivel  Boolean     @default(true)
+  ongId       String
+  ong         Ong         @relation(fields: [ongId], references: [id])
+  
+  adocoes     Adocao[]
+}
+
+model Adocao {
+  id                  String       @id @default(uuid())
+  dataSolicitacao     DateTime     @default(now())
+  status              StatusAdocao @default(EM_ANALISE)
+  
+  vistoria30DiasRealizada Boolean @default(false)
+  vistoria90DiasRealizada Boolean @default(false)
+
+  adotanteId          String
+  adotante            Adotante     @relation(fields: [adotanteId], references: [id])
+  
+  animalId            String
+  animal              Animal       @relation(fields: [animalId], references: [id])
+}
