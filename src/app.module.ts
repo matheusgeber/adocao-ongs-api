@@ -7,6 +7,7 @@ import { OngModule } from './ong/ong.module.js';
 import { AdotanteModule } from './adotante/adotante.module.js';
 import { AnimalModule } from './animal/animal.module.js';
 import { AdocaoModule } from './adocao/adocao.module.js';
+import { PrismaModule } from './prisma/prisma.module.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -24,6 +25,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     AdotanteModule,
     AnimalModule,
     AdocaoModule,
+    PrismaModule,
   ],
   controllers: [AppController],
   providers: [AppService],
