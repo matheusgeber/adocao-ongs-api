@@ -12,15 +12,15 @@ export class AdocaoService {
     return `This action returns all adocao`;
   }
 
-  findOne(id: number) {
+  findOne(id: string) {
     return `This action returns a #${id} adocao`;
   }
 
-  update(id: number, updateAdocaoDto: UpdateAdocaoDto) {
+  update(id: string, updateAdocaoDto: UpdateAdocaoDto) {
     return `This action updates a #${id} adocao`;
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return `This action removes a #${id} adocao`;
   }
 }

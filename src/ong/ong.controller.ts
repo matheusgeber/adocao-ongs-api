@@ -5,7 +5,7 @@ import { UpdateOngDto } from './dto/update-ong.dto.js';
 
 @Controller('ong')
 export class OngController {
-  constructor(private readonly ongService: OngService) {}
+  constructor(private readonly ongService: OngService) { }
 
   @Post()
   create(@Body() createOngDto: CreateOngDto) {
@@ -19,16 +19,16 @@ export class OngController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.ongService.findOne(+id);
+    return this.ongService.findOne(id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateOngDto: UpdateOngDto) {
-    return this.ongService.update(+id, updateOngDto);
+    return this.ongService.update(id, updateOngDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.ongService.remove(+id);
+    return this.ongService.remove(id);
   }
 }

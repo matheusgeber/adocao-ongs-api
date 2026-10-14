@@ -5,7 +5,7 @@ import { UpdateAdotanteDto } from './dto/update-adotante.dto.js';
 
 @Controller('adotante')
 export class AdotanteController {
-  constructor(private readonly adotanteService: AdotanteService) {}
+  constructor(private readonly adotanteService: AdotanteService) { }
 
   @Post()
   create(@Body() createAdotanteDto: CreateAdotanteDto) {
@@ -19,16 +19,16 @@ export class AdotanteController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.adotanteService.findOne(+id);
+    return this.adotanteService.findOne(id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateAdotanteDto: UpdateAdotanteDto) {
-    return this.adotanteService.update(+id, updateAdotanteDto);
+    return this.adotanteService.update(id, updateAdotanteDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.adotanteService.remove(+id);
+    return this.adotanteService.remove(id);
   }
 }

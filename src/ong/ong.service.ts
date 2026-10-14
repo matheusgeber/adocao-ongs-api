@@ -12,15 +12,15 @@ export class OngService {
     return `This action returns all ong`;
   }
 
-  findOne(id: number) {
+  findOne(id: string) {
     return `This action returns a #${id} ong`;
   }
 
-  update(id: number, updateOngDto: UpdateOngDto) {
+  update(id: string, updateOngDto: UpdateOngDto) {
     return `This action updates a #${id} ong`;
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return `This action removes a #${id} ong`;
   }
 }

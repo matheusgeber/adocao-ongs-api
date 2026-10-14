@@ -5,7 +5,7 @@ import { UpdateAdocaoDto } from './dto/update-adocao.dto.js';
 
 @Controller('adocao')
 export class AdocaoController {
-  constructor(private readonly adocaoService: AdocaoService) {}
+  constructor(private readonly adocaoService: AdocaoService) { }
 
   @Post()
   create(@Body() createAdocaoDto: CreateAdocaoDto) {
@@ -19,16 +19,16 @@ export class AdocaoController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.adocaoService.findOne(+id);
+    return this.adocaoService.findOne(id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateAdocaoDto: UpdateAdocaoDto) {
-    return this.adocaoService.update(+id, updateAdocaoDto);
+    return this.adocaoService.update(id, updateAdocaoDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.adocaoService.remove(+id);
+    return this.adocaoService.remove(id);
   }
 }

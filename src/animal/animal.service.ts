@@ -12,15 +12,15 @@ export class AnimalService {
     return `This action returns all animal`;
   }
 
-  findOne(id: number) {
+  findOne(id: string) {
     return `This action returns a #${id} animal`;
   }
 
-  update(id: number, updateAnimalDto: UpdateAnimalDto) {
+  update(id: string, updateAnimalDto: UpdateAnimalDto) {
     return `This action updates a #${id} animal`;
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return `This action removes a #${id} animal`;
   }
 }

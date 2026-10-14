@@ -12,15 +12,15 @@ export class AdotanteService {
     return `This action returns all adotante`;
   }
 
-  findOne(id: number) {
+  findOne(id: string) {
     return `This action returns a #${id} adotante`;
   }
 
-  update(id: number, updateAdotanteDto: UpdateAdotanteDto) {
+  update(id: string, updateAdotanteDto: UpdateAdotanteDto) {
     return `This action updates a #${id} adotante`;
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return `This action removes a #${id} adotante`;
   }
 }
