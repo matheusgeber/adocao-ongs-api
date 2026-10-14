@@ -25,29 +25,76 @@ enum StatusAdocao {
   APROVADA
   REJEITADA
   CONCLUIDA
+  CANCELADA
+}
+
+enum StatusAnimal {
+  DISPONIVEL
+  EM_PROCESSO
+  ADOTADO
+}
+
+enum TipoRegistroSaude {
+  VACINA
+  CASTRACAO
+  CONSULTA
+}
+
+enum CategoriaPergunta {
+  ESPACO
+  ROTINA
+  EXPERIENCIA
+}
+
+enum TipoAcompanhamento {
+  DIAS_30
+  DIAS_90
 }
 
 model Usuario {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  senha     String
-  perfil    Perfil   @default(ADOTANTE)
-  ativo     Boolean  @default(true)
-  criadoEm  DateTime @default(now())
+  id              String    @id @default(uuid())
+  email           String    @unique
+  senha           String
+  perfil          Perfil    @default(ADOTANTE)
+  ativo           Boolean   @default(true)
+  criadoEm        DateTime  @default(now())
   
-  ong       Ong?
-  adotante  Adotante?
+  tentativasLogin Int       @default(0)
+  bloqueadoAte    DateTime?
+  refreshToken    String?
+  ongId           String?   
+  
+  ongDona         Ong?      @relation("OngProprietario")
+  ongVinculo      Ong?      @relation("OngVoluntarios", fields: [ongId], references: [id])
+  adotante        Adotante?
+  visitas         Visita[]
 }
 
 model Ong {
-  id        String   @id @default(uuid())
-  nome      String
-  cnpj      String   @unique
-  telefone  String
-  usuarioId String   @unique
-  usuario   Usuario  @relation(fields: [usuarioId], references: [id])
+  id          String   @id @default(uuid())
+  nome        String
+  cnpj        String   @unique
+  telefone    String
+  cidade      String
   
-  animais   Animal[]
+  usuarioId   String   @unique
+  usuario     Usuario  @relation("OngProprietario", fields: [usuarioId], references: [id])
+  
+  animais     Animal[]
+  abrigos     Abrigo[]
+  voluntarios Usuario[] @relation("OngVoluntarios")
+}
+
+model Abrigo {
+  id         String   @id @default(uuid())
+  nome       String
+  cidade     String
+  capacidade Int
+  
+  ongId      String
+  ong        Ong      @relation(fields: [ongId], references: [id])
+  
+  animais    Animal[]
 }
 
 model Adotante {
@@ -57,37 +104,115 @@ model Adotante {
   telefone              String
   pontuacaoQuestionario Int      @default(0)
   bloqueado             Boolean  @default(false)
+  
   usuarioId             String   @unique
   usuario               Usuario  @relation(fields: [usuarioId], references: [id])
   
   adocoes               Adocao[]
+  questionarios         Questionario[]
 }
 
 model Animal {
-  id          String      @id @default(uuid())
+  id          String         @id @default(uuid())
   nome        String
   especie     String
   raca        String?
   porte       PorteAnimal
   idadeMeses  Int
-  disponivel  Boolean     @default(true)
+  status      StatusAnimal   @default(DISPONIVEL)
+  castrado    Boolean        @default(false)
+  
   ongId       String
-  ong         Ong         @relation(fields: [ongId], references: [id])
+  ong         Ong            @relation(fields: [ongId], references: [id])
+  
+  abrigoId    String?
+  abrigo      Abrigo?        @relation(fields: [abrigoId], references: [id])
   
   adocoes     Adocao[]
+  registrosSaude RegistroSaude[]
+}
+
+model RegistroSaude {
+  id        String            @id @default(uuid())
+  tipo      TipoRegistroSaude
+  descricao String
+  data      DateTime
+  
+  animalId  String
+  animal    Animal            @relation(fields: [animalId], references: [id])
+}
+
+model Pergunta {
+  id        String            @id @default(uuid())
+  texto     String
+  categoria CategoriaPergunta
+  peso      Int
+  ativa     Boolean           @default(true)
+  
+  respostas Resposta[]
+}
+
+model Questionario {
+  id            String     @id @default(uuid())
+  pontuacao     Int        @default(0)
+  dataResposta  DateTime   @default(now())
+  revisado      Boolean    @default(false)
+  observacaoOng String?
+  
+  adotanteId    String
+  adotante      Adotante   @relation(fields: [adotanteId], references: [id])
+  
+  respostas     Resposta[]
+}
+
+model Resposta {
+  id             String       @id @default(uuid())
+  valor          Int          
+  
+  questionarioId String
+  questionario   Questionario @relation(fields: [questionarioId], references: [id])
+  
+  perguntaId     String
+  pergunta       Pergunta     @relation(fields: [perguntaId], references: [id])
 }
 
 model Adocao {
-  id                  String       @id @default(uuid())
-  dataSolicitacao     DateTime     @default(now())
-  status              StatusAdocao @default(EM_ANALISE)
+  id              String         @id @default(uuid())
+  dataSolicitacao DateTime       @default(now())
+  status          StatusAdocao   @default(EM_ANALISE)
+  dataAprovacao   DateTime?
+  dataConclusao   DateTime?
   
-  vistoria30DiasRealizada Boolean @default(false)
-  vistoria90DiasRealizada Boolean @default(false)
+  adotanteId      String
+  adotante        Adotante       @relation(fields: [adotanteId], references: [id])
+  
+  animalId        String
+  animal          Animal         @relation(fields: [animalId], references: [id])
+  
+  visitas         Visita[]
+  acompanhamentos Acompanhamento[]
+}
 
-  adotanteId          String
-  adotante            Adotante     @relation(fields: [adotanteId], references: [id])
+model Visita {
+  id           String   @id @default(uuid())
+  dataAgendada DateTime
+  status       String   @default("AGENDADA")
+  observacao   String?
   
-  animalId            String
-  animal              Animal       @relation(fields: [animalId], references: [id])
+  adocaoId     String
+  adocao       Adocao   @relation(fields: [adocaoId], references: [id])
+  
+  voluntarioId String
+  voluntario   Usuario  @relation(fields: [voluntarioId], references: [id])
+}
+
+model Acompanhamento {
+  id            String             @id @default(uuid())
+  tipo          TipoAcompanhamento
+  dataPrevista  DateTime
+  dataRealizada DateTime?
+  status        String             @default("PENDENTE")
+  
+  adocaoId      String
+  adocao        Adocao             @relation(fields: [adocaoId], references: [id])
 }
