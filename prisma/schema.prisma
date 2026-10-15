@@ -212,6 +212,7 @@ model Acompanhamento {
   dataPrevista  DateTime
   dataRealizada DateTime?
   status        String             @default("PENDENTE")
+  observacao    String?
   
   adocaoId      String
   adocao        Adocao             @relation(fields: [adocaoId], references: [id])

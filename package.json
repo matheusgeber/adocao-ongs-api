@@ -20,6 +20,7 @@
     "test:cov": "vitest run --coverage",
     "test:debug": "vitest --inspect-brk --no-file-parallelism",
     "test:e2e": "vitest run --config ./vitest.config.e2e.ts",
+    "seed:adocoes": "node prisma/seed-adocoes.ts",
     "postinstall": "prisma skills sync || exit 0"
   },
   "dependencies": {
@@ -28,6 +29,7 @@
     "@nestjs/event-emitter": "^12.0.1",
     "@nestjs/observe": "^0.3.0",
     "@nestjs/platform-express": "^12.0.1",
+    "@nestjs/schedule": "^12.0.2",
     "@nestjs/swagger": "^12.0.2",
     "@prisma/client": "^5.22.0",
     "bcrypt": "^6.0.0",
