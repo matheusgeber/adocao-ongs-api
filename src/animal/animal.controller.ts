@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { AnimalService } from './animal.service.js';
 import { CreateAnimalDto } from './dto/create-animal.dto.js';
 import { UpdateAnimalDto } from './dto/update-animal.dto.js';
+import { ListAnimalDto } from './dto/list-animal.dto.js';
 
 @Controller('animal')
 export class AnimalController {
@@ -13,8 +14,8 @@ export class AnimalController {
   }
 
   @Get()
-  findAll() {
-    return this.animalService.findAll();
+  findAll(@Query() query: ListAnimalDto) {
+    return this.animalService.findAll(query);
   }
 
   @Get(':id')

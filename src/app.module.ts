@@ -10,6 +10,8 @@ import { PrismaModule } from './prisma/prisma.module.js';
 import { AuthModule } from './auth/auth.module.js';
 import { AbrigoModule } from './abrigo/abrigo.module.js';
 import { RegistroSaudeModule } from './registro-saude/registro-saude.module.js';
+import { VisitaModule } from './visita/visita.module.js';
+import { AcompanhamentoModule } from './acompanhamento/acompanhamento.module.js';
 
 @Module({
   imports: [
@@ -22,6 +24,8 @@ import { RegistroSaudeModule } from './registro-saude/registro-saude.module.js';
     AuthModule,
     AbrigoModule,
     RegistroSaudeModule,
+    VisitaModule,
+    AcompanhamentoModule,
   ],
   controllers: [AppController],
   providers: [AppService],
