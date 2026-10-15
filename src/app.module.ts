@@ -8,6 +8,8 @@ import { AnimalModule } from './animal/animal.module.js';
 import { AdocaoModule } from './adocao/adocao.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
 import { AuthModule } from './auth/auth.module.js';
+import { VisitaModule } from './visita/visita.module.js';
+import { AcompanhamentoModule } from './acompanhamento/acompanhamento.module.js';
 
 @Module({
   imports: [
@@ -18,6 +20,8 @@ import { AuthModule } from './auth/auth.module.js';
     AdocaoModule,
     PrismaModule,
     AuthModule,
+    VisitaModule,
+    AcompanhamentoModule,
   ],
   controllers: [AppController],
   providers: [AppService],
