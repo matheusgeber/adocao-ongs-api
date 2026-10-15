@@ -1,26 +1,67 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { CreateQuestionarioDto } from './dto/create-questionario.dto.js';
 import { ListarQuestionariosDto } from './dto/listar-questionarios.dto.js';
 import { QuestionariosRepository } from './questionarios.repository.js';
 import { RevisarQuestionarioDto } from './dto/revisar-questionario.dto.js';
 import { Prisma } from '@prisma/client';
 import { paginar, respostaPaginada } from '../common/dto/paginacao.dto.js';
+import { PrismaService } from '../prisma/prisma.service.js';
 
 @Injectable()
 export class QuestionariosService {
-  constructor(private readonly questionariosRepository: QuestionariosRepository) { }
+  constructor(private prisma: PrismaService, private readonly questionariosRepository: QuestionariosRepository) { }
 
   async create(createQuestionarioDto: CreateQuestionarioDto) {
-    const dados = {
-      adotanteId: createQuestionarioDto.adotanteId,
-      respostas: {
-        create: createQuestionarioDto.respostas.map(r => ({
-          perguntaId: r.perguntaId,
-          valor: r.valor
-        }))
+
+    const { adotanteId, respostas } = createQuestionarioDto;
+    const perguntasAtivas = await this.prisma.pergunta.findMany({
+      where: { ativa: true }
+    });
+
+    if (respostas.length !== perguntasAtivas.length) {
+      throw new BadRequestException('É obrigatório responder a todas as perguntas ativas.');
+    }
+
+    let pontuacaoAbsoluta = 0;
+    let pontuacaoMaximaPossivel = 0;
+    const VALOR_MAXIMO_RESPOSTA = 5;
+
+    for (const pergunta of perguntasAtivas) {
+      const respostaDada = respostas.find(r => r.perguntaId === pergunta.id);
+
+      if (!respostaDada) {
+        throw new BadRequestException(`Falta a resposta para a pergunta: ${pergunta.texto}`);
       }
-    };
-    return this.questionariosRepository.create(dados as any);
+
+      pontuacaoAbsoluta += respostaDada.valor * pergunta.peso;
+      pontuacaoMaximaPossivel += VALOR_MAXIMO_RESPOSTA * pergunta.peso;
+    }
+
+    const pontuacaoFinal100 = Math.round((pontuacaoAbsoluta / pontuacaoMaximaPossivel) * 100);
+
+    const resultado = await this.prisma.$transaction(async (tx) => {
+      const novoQuestionario = await tx.questionario.create({
+        data: {
+          adotanteId,
+          pontuacao: pontuacaoFinal100,
+          respostas: {
+            create: respostas.map(r => ({
+              perguntaId: r.perguntaId,
+              valor: r.valor
+            }))
+          }
+        }
+      });
+
+      await tx.adotante.update({
+        where: { id: adotanteId },
+        data: { pontuacaoQuestionario: pontuacaoFinal100 }
+      });
+
+      return novoQuestionario;
+    });
+
+    return resultado;
   }
 
   async findAll(filtros: ListarQuestionariosDto) {
