@@ -1,26 +1,55 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateAdotanteDto } from './dto/create-adotante.dto.js';
-import { UpdateAdotanteDto } from './dto/update-adotante.dto.js';
+import { ListarAdotantesDto } from './dto/listar-adotantes.dto.js';
+import { AdotanteRepository } from './adotante.repository.js';
+import { Prisma } from '@prisma/client';
+import { paginar, respostaPaginada } from '../common/dto/paginacao.dto.js';
 
 @Injectable()
 export class AdotanteService {
-  create(createAdotanteDto: CreateAdotanteDto) {
-    return 'This action adds a new adotante';
+  constructor(private readonly adotanteRepository: AdotanteRepository) { }
+
+  async create(createAdotanteDto: CreateAdotanteDto) {
+    return this.adotanteRepository.create(createAdotanteDto);
   }
 
-  findAll() {
-    return `This action returns all adotante`;
+  async findAll(filtros: ListarAdotantesDto) {
+    const { skip, take } = paginar(filtros);
+    const where: Prisma.AdotanteWhereInput = {};
+
+    if (filtros.nome) {
+      where.nome = { contains: filtros.nome, mode: 'insensitive' };
+    }
+    if (filtros.bloqueado !== undefined) {
+      where.bloqueado = filtros.bloqueado === 'true';
+    }
+
+    const [dados, total] = await Promise.all([
+      this.adotanteRepository.findMany(skip, take, where),
+      this.adotanteRepository.count(where)
+    ]);
+
+    return respostaPaginada(dados, total, filtros);
   }
 
-  findOne(id: string) {
-    return `This action returns a #${id} adotante`;
+  async findOne(id: string) {
+    const adotante = await this.adotanteRepository.findById(id);
+    if (!adotante) throw new NotFoundException('Adotante não encontrado');
+    return adotante;
   }
 
-  update(id: string, updateAdotanteDto: UpdateAdotanteDto) {
-    return `This action updates a #${id} adotante`;
+  async update(id: string, updateAdotanteDto: Partial<CreateAdotanteDto>) {
+    await this.findOne(id);
+    return this.adotanteRepository.update(id, updateAdotanteDto);
   }
 
-  remove(id: string) {
-    return `This action removes a #${id} adotante`;
+  async desbloquear(id: string) {
+    await this.findOne(id);
+    return this.adotanteRepository.update(id, { bloqueado: false });
+  }
+
+  async remove(id: string) {
+    await this.findOne(id);
+    return this.adotanteRepository.delete(id);
   }
 }
