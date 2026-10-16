@@ -1,11 +1,19 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { OngService } from './ong.service.js';
 import { CreateOngDto } from './dto/create-ong.dto.js';
 import { UpdateOngDto } from './dto/update-ong.dto.js';
 
 @Controller('ong')
 export class OngController {
-  constructor(private readonly ongService: OngService) { }
+  constructor(private readonly ongService: OngService) {}
 
   @Post()
   create(@Body() createOngDto: CreateOngDto) {

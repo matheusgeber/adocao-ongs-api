@@ -6,6 +6,6 @@ import { OngRepository } from './ong.repository.js';
 @Module({
   controllers: [OngController],
   providers: [OngService, OngRepository],
-  exports: [OngService, OngRepository]
+  exports: [OngService, OngRepository],
 })
 export class OngModule {}
