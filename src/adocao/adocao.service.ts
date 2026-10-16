@@ -6,6 +6,11 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { Perfil, PorteAnimal, StatusAdocao, StatusAnimal } from '@prisma/client';
+import {
+  IDADE_MINIMA_MESES,
+  normalizar,
+  vacinasObrigatorias,
+} from '../animal/regras/vacinas-obrigatorias.js';
 import { respostaPaginada } from '../common/dto/paginacao.dto.js';
 import type { UsuarioAutenticado } from '../common/interfaces/usuario-autenticado.interface.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -61,6 +66,8 @@ export class AdocaoService {
     if (animal.status !== StatusAnimal.DISPONIVEL) {
       throw new ConflictException('Esse animal não está disponível para adoção');
     }
+    await this.validarSaudeDoAnimal(animal);
+
     if (adotante.bloqueado) {
       throw new ForbiddenException('Você está bloqueado para novas adoções');
     }
@@ -161,6 +168,26 @@ export class AdocaoService {
       }
       return atualizada;
     });
+  }
+
+  private async validarSaudeDoAnimal(animal: { id: string; especie: string; idadeMeses: number }) {
+    if (animal.idadeMeses < IDADE_MINIMA_MESES) {
+      throw new UnprocessableEntityException(
+        `O animal precisa ter pelo menos ${IDADE_MINIMA_MESES} meses para ser adotado`,
+      );
+    }
+
+    const obrigatorias = vacinasObrigatorias(animal.especie);
+    if (obrigatorias.length === 0) return;
+
+    const registros = await this.repository.buscarVacinas(animal.id);
+    const aplicadas = normalizar(registros.map((r) => r.descricao).join(' '));
+    const faltando = obrigatorias.filter((vacina) => !aplicadas.includes(normalizar(vacina)));
+    if (faltando.length > 0) {
+      throw new UnprocessableEntityException(
+        `O animal ainda não tem as vacinas obrigatórias: ${faltando.join(', ')}`,
+      );
+    }
   }
 
   private async buscarOuFalhar(id: string) {

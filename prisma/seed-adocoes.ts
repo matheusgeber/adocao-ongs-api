@@ -43,18 +43,30 @@ async function main() {
   });
 
   const animais = [
-    { id: id(10), nome: 'Rex', porte: 'GRANDE', status: 'DISPONIVEL' },
-    { id: id(11), nome: 'Mel', porte: 'PEQUENO', status: 'DISPONIVEL' },
-    { id: id(12), nome: 'Thor', porte: 'MEDIO', status: 'EM_PROCESSO' },
-    { id: id(13), nome: 'Luna', porte: 'MEDIO', status: 'ADOTADO' },
-    { id: id(14), nome: 'Bolt', porte: 'PEQUENO', status: 'ADOTADO' },
-    { id: id(15), nome: 'Nina', porte: 'GRANDE', status: 'DISPONIVEL' },
+    { id: id(10), nome: 'Rex', porte: 'GRANDE', status: 'DISPONIVEL', idadeMeses: 24 },
+    { id: id(11), nome: 'Mel', porte: 'PEQUENO', status: 'DISPONIVEL', idadeMeses: 24 },
+    { id: id(12), nome: 'Thor', porte: 'MEDIO', status: 'EM_PROCESSO', idadeMeses: 24 },
+    { id: id(13), nome: 'Luna', porte: 'MEDIO', status: 'ADOTADO', idadeMeses: 24 },
+    { id: id(14), nome: 'Bolt', porte: 'PEQUENO', status: 'ADOTADO', idadeMeses: 24 },
+    { id: id(15), nome: 'Nina', porte: 'GRANDE', status: 'DISPONIVEL', idadeMeses: 24 },
+    { id: id(16), nome: 'Pipoca', porte: 'PEQUENO', status: 'DISPONIVEL', idadeMeses: 3 },
+    { id: id(17), nome: 'Fred', porte: 'MEDIO', status: 'DISPONIVEL', idadeMeses: 24 },
   ] as const;
   for (const a of animais) {
     await prisma.animal.upsert({
       where: { id: a.id },
       update: {},
-      create: { ...a, especie: 'Cachorro', idadeMeses: 24, castrado: true, ongId: ong.id, abrigoId: abrigo.id },
+      create: { ...a, especie: 'Cachorro', castrado: true, ongId: ong.id, abrigoId: abrigo.id },
+    });
+  }
+
+  // Pipoca (filhote) e Fred (sem vacina) ficam de fora pra mostrar a regra de saúde
+  const comVacina = animais.filter((a) => a.id !== id(16) && a.id !== id(17));
+  for (const [i, a] of comVacina.entries()) {
+    await prisma.registroSaude.upsert({
+      where: { id: id(60 + i) },
+      update: {},
+      create: { id: id(60 + i), tipo: 'VACINA', descricao: 'V10 e Antirrábica', data: diasAtras(90), animalId: a.id },
     });
   }
 

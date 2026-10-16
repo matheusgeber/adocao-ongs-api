@@ -1,5 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { Perfil, Prisma, StatusAdocao, StatusAnimal, TipoAcompanhamento } from '@prisma/client';
+import {
+  Perfil,
+  Prisma,
+  StatusAdocao,
+  StatusAnimal,
+  TipoAcompanhamento,
+  TipoRegistroSaude,
+} from '@prisma/client';
 import { DIAS_POR_TIPO, somarDias } from '../acompanhamento/prazos.js';
 import { paginar } from '../common/dto/paginacao.dto.js';
 import type { UsuarioAutenticado } from '../common/interfaces/usuario-autenticado.interface.js';
@@ -46,6 +53,13 @@ export class AdocaoRepository {
 
   buscarAnimal(id: string, db: Db = this.prisma) {
     return db.animal.findUnique({ where: { id } });
+  }
+
+  buscarVacinas(animalId: string) {
+    return this.prisma.registroSaude.findMany({
+      where: { animalId, tipo: TipoRegistroSaude.VACINA },
+      select: { descricao: true },
+    });
   }
 
   buscarAdotantePorUsuario(usuarioId: string) {
