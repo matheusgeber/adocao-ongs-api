@@ -1,4 +1,4 @@
-import { ConflictException, ForbiddenException, Injectable, NotFoundException, UnprocessableEntityException,} from '@nestjs/common';
+import { ConflictException, ForbiddenException, Injectable, NotFoundException, UnprocessableEntityException, } from '@nestjs/common';
 import { Perfil, TipoRegistroSaude } from '@prisma/client';
 import { AnimalRepository } from './animal.repository.js';
 import { CreateAnimalDto } from './dto/create-animal.dto.js';
@@ -6,7 +6,7 @@ import { UpdateAnimalDto } from './dto/update-animal.dto.js';
 import { TransferirAnimalDto } from './dto/transferir-animal.dto.js';
 import { ListAnimalDto } from './dto/list-animal.dto.js';
 import { StatusAnimal } from './entities/animal.entity.js';
-import {IDADE_MINIMA_MESES, normalizar, vacinasObrigatorias} from './regras/vacinas-obrigatorias.js';
+import { IDADE_MINIMA_MESES, normalizar, vacinasObrigatorias } from './regras/vacinas-obrigatorias.js';
 import type { UsuarioAutenticado } from '../common/interfaces/usuario-autenticado.interface.js';
 import { OngRepository } from '../ong/ong.repository.js';
 import { AbrigoRepository } from '../abrigo/abrigo.repository.js';
@@ -21,7 +21,7 @@ export class AnimalService {
     private readonly ongRepository: OngRepository,
     private readonly abrigoRepository: AbrigoRepository,
     @Inject(CACHE_MANAGER) private readonly cache: Cache,
-  ) {}
+  ) { }
 
   async findAll(dto: ListAnimalDto) {
     const { dados, total } = await this.animalRepository.findMany(dto);

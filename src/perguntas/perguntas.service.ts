@@ -4,10 +4,11 @@ import { ListarPerguntasDto } from './dto/listar-perguntas.dto.js';
 import { PerguntasRepository } from './perguntas.repository.js';
 import { Prisma } from '@prisma/client';
 import { paginar, respostaPaginada } from '../common/dto/paginacao.dto.js';
+import { PrismaService } from '../prisma/prisma.service.js';
 
 @Injectable()
 export class PerguntasService {
-  constructor(private readonly perguntasRepository: PerguntasRepository) { }
+  constructor(private prisma: PrismaService, private readonly perguntasRepository: PerguntasRepository) { }
 
   async create(createPerguntaDto: CreatePerguntaDto) {
     return this.perguntasRepository.create(createPerguntaDto as any);
@@ -44,7 +45,23 @@ export class PerguntasService {
   }
 
   async remove(id: string) {
-    await this.findOne(id);
-    return this.perguntasRepository.delete(id);
+    const pergunta = await this.prisma.pergunta.findUnique({ where: { id } });
+    if (!pergunta) {
+      throw new NotFoundException('Pergunta não encontrada');
+    }
+
+    const temRespostas = await this.prisma.resposta.findFirst({
+      where: { perguntaId: id },
+    });
+
+    if (temRespostas) {
+      return this.prisma.pergunta.update({
+        where: { id },
+        data: { ativa: false },
+      });
+    }
+    return this.prisma.pergunta.delete({
+      where: { id },
+    });
   }
 }

@@ -12,6 +12,7 @@ import { CreateUsuarioDto } from './dto/create-usuario.dto.js';
 import { ListarUsuariosDto } from './dto/listar-usuarios.dto.js';
 import type { UsuarioAutenticado } from '../common/interfaces/usuario-autenticado.interface.js';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto.js';
+import { AlterarPerfilDto } from './dto/alterar-perfil.dto.js';
 
 @Injectable()
 export class UsuarioService {
@@ -83,5 +84,30 @@ export class UsuarioService {
       data.refreshToken = null;
     }
     return this.usuarioRepository.updatePublico(id, data);
+  }
+
+  async alterarPerfil(id: string, dto: AlterarPerfilDto) {
+    const usuario = await this.usuarioRepository.findById(id);
+    if (!usuario) throw new NotFoundException('Usuário não encontrado');
+    if (usuario.ongDona) {
+      throw new ConflictException(
+        'Este usuário é responsável por uma ONG e não pode mudar de perfil',
+      );
+    }
+    await this.validarOngDoVoluntario(dto.perfil, dto.ongId);
+
+    return this.usuarioRepository.updatePublico(id, {
+      perfil: dto.perfil,
+      ongId: dto.perfil === Perfil.VOLUNTARIO ? dto.ongId : null,
+      refreshToken: null,
+    });
+  }
+
+  async desativar(id: string) {
+    await this.buscarPorId(id);
+    return this.usuarioRepository.updatePublico(id, {
+      ativo: false,
+      refreshToken: null,
+    });
   }
 }
