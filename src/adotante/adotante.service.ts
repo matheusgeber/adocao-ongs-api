@@ -1,13 +1,14 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { CreateAdotanteDto } from './dto/create-adotante.dto.js';
 import { ListarAdotantesDto } from './dto/listar-adotantes.dto.js';
 import { AdotanteRepository } from './adotante.repository.js';
 import { Prisma } from '@prisma/client';
 import { paginar, respostaPaginada } from '../common/dto/paginacao.dto.js';
+import { PrismaService } from '../prisma/prisma.service.js';
 
 @Injectable()
 export class AdotanteService {
-  constructor(private readonly adotanteRepository: AdotanteRepository) { }
+  constructor(private prisma: PrismaService, private readonly adotanteRepository: AdotanteRepository) { }
 
   async create(createAdotanteDto: CreateAdotanteDto) {
     return this.adotanteRepository.create(createAdotanteDto);
@@ -49,7 +50,27 @@ export class AdotanteService {
   }
 
   async remove(id: string) {
-    await this.findOne(id);
-    return this.adotanteRepository.delete(id);
+    const adotante = await this.prisma.adotante.findUnique({ where: { id } });
+    if (!adotante) {
+      throw new NotFoundException('Adotante não encontrado');
+    }
+    const adocaoEmAndamento = await this.prisma.adocao.findFirst({
+      where: {
+        adotanteId: id,
+        status: {
+          in: ['EM_ANALISE', 'APROVADA'],
+        },
+      },
+    });
+
+    if (adocaoEmAndamento) {
+      throw new BadRequestException(
+        'Não é possível excluir um adotante que tenha uma adoção em análise ou aprovada.',
+      );
+    }
+
+    return this.prisma.adotante.delete({
+      where: { id },
+    });
   }
 }

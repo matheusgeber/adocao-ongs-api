@@ -18,7 +18,7 @@ import { UseInterceptors } from '@nestjs/common';
 @ApiBearerAuth()
 @Controller('animais')
 export class AnimalController {
-  constructor(private readonly service: AnimalService) {}
+  constructor(private readonly service: AnimalService) { }
 
   @UseInterceptors(CacheInterceptor)
   @Get()

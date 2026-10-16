@@ -11,24 +11,24 @@ import { CreateAbrigoDto } from './dto/create-abrigo.dto.js';
 import { UpdateAbrigoDto } from './dto/update-abrigo.dto.js';
 import { ListAbrigoDto } from './dto/list-abrigo.dto.js';
 import { CacheInterceptor } from '@nestjs/cache-manager';
- 
+
 @ApiTags('Abrigos')
 @ApiBearerAuth()
 @Controller('abrigos')
 export class AbrigoController {
-  constructor(private readonly abrigoService: AbrigoService) {}
- 
+  constructor(private readonly abrigoService: AbrigoService) { }
+
   @UseInterceptors(CacheInterceptor)
   @Get()
   findAll(@Query() query: ListAbrigoDto) {
     return this.abrigoService.findAll(query);
   }
- 
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.abrigoService.findOne(id);
   }
- 
+
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Perfil.ONG)
   @Post()
@@ -38,7 +38,7 @@ export class AbrigoController {
   ) {
     return this.abrigoService.create(dto, usuario);
   }
- 
+
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Perfil.ONG)
   @Patch(':id')
@@ -49,7 +49,7 @@ export class AbrigoController {
   ) {
     return this.abrigoService.update(id, dto, usuario);
   }
- 
+
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Perfil.ONG)
   @Delete(':id')
