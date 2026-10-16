@@ -19,6 +19,7 @@ import { ListarUsuariosDto } from './dto/listar-usuarios.dto.js';
 import { UsuarioLogado } from '../common/decorators/usuario-logado.decorator.js';
 import type { UsuarioAutenticado } from '../common/interfaces/usuario-autenticado.interface.js';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto.js';
+import { AlterarPerfilDto } from './dto/alterar-perfil.dto.js';
 
 @ApiTags('Usuários')
 @ApiBearerAuth()
@@ -60,5 +61,22 @@ export class UsuarioController {
     @UsuarioLogado() usuario: UsuarioAutenticado,
   ) {
     return this.usuarioService.atualizar(id, dto, usuario);
+  }
+
+  @Patch(':id/perfil')
+  @Roles('ADMIN')
+  @ApiOperation({ summary: 'Altera o perfil de um usuário' })
+  alterarPerfil(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: AlterarPerfilDto,
+  ) {
+    return this.usuarioService.alterarPerfil(id, dto);
+  }
+
+  @Patch(':id/desativar')
+  @Roles('ADMIN')
+  @ApiOperation({ summary: 'Desativa um usuário e encerra as sessões dele' })
+  desativar(@Param('id', ParseUUIDPipe) id: string) {
+    return this.usuarioService.desativar(id);
   }
 }
