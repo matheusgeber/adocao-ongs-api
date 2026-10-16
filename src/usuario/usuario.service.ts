@@ -1,26 +1,48 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { Perfil, Prisma } from '@prisma/client';
+import bcrypt from 'bcrypt';
+import { paginar, respostaPaginada } from '../common/dto/paginacao.dto.js';
+import { UsuarioRepository } from './usuario.repository.js';
 import { CreateUsuarioDto } from './dto/create-usuario.dto.js';
-import { UpdateUsuarioDto } from './dto/update-usuario.dto.js';
+import { ListarUsuariosDto } from './dto/listar-usuarios.dto.js';
 
 @Injectable()
 export class UsuarioService {
-  create(createUsuarioDto: CreateUsuarioDto) {
-    return 'This action adds a new usuario';
+  constructor(private readonly usuarioRepository: UsuarioRepository) {}
+
+  async listar(filtros: ListarUsuariosDto) {
+    const where: Prisma.UsuarioWhereInput = { perfil: filtros.perfil, ativo: filtros.ativo };
+    const [dados, total] = await Promise.all([
+      this.usuarioRepository.findMany(where, paginar(filtros)),
+      this.usuarioRepository.count(where),
+    ]);
+    return respostaPaginada(dados, total, filtros);
   }
 
-  findAll() {
-    return `This action returns all usuario`;
+  async buscarPorId(id: string) {
+    const usuario = await this.usuarioRepository.findPublicoById(id);
+    if (!usuario) throw new NotFoundException('Usuário não encontrado');
+    return usuario;
   }
 
-  findOne(id: string) {
-    return `This action returns a #${id} usuario`;
+  async criar(dto: CreateUsuarioDto) {
+    if (await this.usuarioRepository.findByEmail(dto.email)) {
+      throw new ConflictException('E-mail já cadastrado');
+    }
+    await this.validarOngDoVoluntario(dto.perfil, dto.ongId);
+
+    const senha = await bcrypt.hash(dto.senha, 10);
+    return this.usuarioRepository.create({
+      email: dto.email,
+      senha,
+      perfil: dto.perfil,
+      ongId: dto.perfil === Perfil.VOLUNTARIO ? dto.ongId : null,
+    });
   }
 
-  update(id: string, updateUsuarioDto: UpdateUsuarioDto) {
-    return `This action updates a #${id} usuario`;
-  }
-
-  remove(id: string) {
-    return `This action removes a #${id} usuario`;
+  private async validarOngDoVoluntario(perfil: Perfil, ongId?: string) {
+    if (perfil === Perfil.VOLUNTARIO && !(await this.usuarioRepository.ongExiste(ongId!))) {
+      throw new NotFoundException('ONG do voluntário não encontrada');
+    }
   }
 }
