@@ -64,7 +64,7 @@ export class AdocaoService {
     if (adotante.bloqueado) {
       throw new ForbiddenException('Você está bloqueado para novas adoções');
     }
-    // acompanhamento vencido e sem registro também bloqueia, mesmo se o job ainda não rodou
+    // vencido sem registro também bloqueia, mesmo antes do job rodar
     if ((await this.repository.contarAcompanhamentosVencidos(adotante.id)) > 0) {
       throw new ForbiddenException(
         'Você tem um acompanhamento atrasado e não pode solicitar novas adoções',
@@ -108,7 +108,6 @@ export class AdocaoService {
       throw new ConflictException('Só dá pra aprovar depois de uma visita realizada');
     }
 
-    // tudo ou nada: se uma das partes falhar, nada muda
     return this.prisma.$transaction(async (tx) => {
       const aprovada = await this.repository.atualizarStatus(
         id,
@@ -150,7 +149,7 @@ export class AdocaoService {
     return this.encerrar(adocao, StatusAdocao.CANCELADA);
   }
 
-  // rejeitar e cancelar: o animal volta a ficar disponível se ninguém mais estiver na fila
+  // o animal volta a ficar disponível se não houver outra solicitação
   private async encerrar(adocao: AdocaoCompleta, novoStatus: StatusAdocao) {
     this.validarTransicao(adocao.status, novoStatus);
 

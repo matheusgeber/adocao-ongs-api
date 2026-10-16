@@ -6,7 +6,7 @@ import type { UsuarioAutenticado } from '../common/interfaces/usuario-autenticad
 import { PrismaService } from '../prisma/prisma.service.js';
 import type { ListarVisitasDto } from './dto/listar-visitas.dto.js';
 
-// nunca devolver o usuário inteiro (tem a senha)
+// sem a senha do usuário
 const incluir = {
   adocao: { include: { animal: true, adotante: true } },
   voluntario: { select: { id: true, email: true } },

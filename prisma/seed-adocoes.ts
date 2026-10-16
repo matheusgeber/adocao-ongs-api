@@ -1,8 +1,7 @@
 import bcrypt from 'bcrypt';
 import { PrismaClient } from '@prisma/client';
 
-// Dados pra demonstrar adoções, visitas e acompanhamentos.
-// Pode rodar mais de uma vez: tudo usa id fixo ou campo único.
+// pode rodar mais de uma vez: usa id fixo ou campo único
 const prisma = new PrismaClient();
 
 const id = (n: number) => `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
@@ -59,7 +58,7 @@ async function main() {
     });
   }
 
-  // adotantes: Ana (pontuação alta), Bruno (pontuação média) e Carla (tem acompanhamento atrasado)
+  // Ana (pontuação alta), Bruno (média) e Carla (acompanhamento atrasado)
   const adotantes = [
     { n: 20, nome: 'Ana Souza', cpf: '11111111111', email: 'ana@adocao.local', pontos: 85 },
     { n: 21, nome: 'Bruno Lima', cpf: '22222222222', email: 'bruno@adocao.local', pontos: 45 },
@@ -79,7 +78,7 @@ async function main() {
     });
   }
 
-  // Ana quer o Thor: em análise, já com visita realizada (dá pra aprovar na hora)
+  // Ana e Thor: em análise, com visita realizada
   await prisma.adocao.upsert({
     where: { id: id(30) },
     update: {},
@@ -98,7 +97,7 @@ async function main() {
     },
   });
 
-  // Ana adotou o Bolt há 80 dias: 30 dias feito, 90 dias vence em 10 dias
+  // Ana e Bolt: adoção de 80 dias atrás
   await prisma.adocao.upsert({
     where: { id: id(31) },
     update: {},
@@ -123,7 +122,7 @@ async function main() {
     create: { id: id(51), tipo: 'DIAS_90', dataPrevista: diasDepois(10), adocaoId: id(31) },
   });
 
-  // Carla adotou a Luna há 40 dias e ninguém registrou o acompanhamento de 30 dias (atrasado)
+  // Carla e Luna: acompanhamento de 30 dias atrasado
   await prisma.adocao.upsert({
     where: { id: id(32) },
     update: {},
@@ -148,7 +147,7 @@ async function main() {
     create: { id: id(53), tipo: 'DIAS_90', dataPrevista: diasDepois(50), adocaoId: id(32) },
   });
 
-  // exemplos de adoções encerradas
+  // adoções encerradas
   await prisma.adocao.upsert({
     where: { id: id(33) },
     update: {},

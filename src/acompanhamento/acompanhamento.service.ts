@@ -70,7 +70,7 @@ export class AcompanhamentoService {
       observacao: dto.observacao,
     });
 
-    // se era o último atrasado, o adotante volta a poder adotar
+    // se era o último atrasado, desbloqueia
     const adotanteId = acompanhamento.adocao.adotanteId;
     if ((await this.repository.contarVencidosDoAdotante(adotanteId)) === 0) {
       await this.repository.desbloquearAdotante(adotanteId);
@@ -78,7 +78,7 @@ export class AcompanhamentoService {
     return registrado;
   }
 
-  // chamado pelo job diário: marca os vencidos como atrasados e bloqueia os adotantes
+  // usado pelo job diário
   async marcarVencidos() {
     const vencidos = await this.repository.buscarVencidos();
     if (vencidos.length === 0) return 0;
