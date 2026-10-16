@@ -10,6 +10,8 @@ import { PrismaModule } from './prisma/prisma.module.js';
 import { AuthModule } from './auth/auth.module.js';
 import { VisitaModule } from './visita/visita.module.js';
 import { AcompanhamentoModule } from './acompanhamento/acompanhamento.module.js';
+import { PerguntasModule } from './perguntas/perguntas.module.js';
+import { QuestionariosModule } from './questionarios/questionarios.module.js';
 
 @Module({
   imports: [
@@ -22,6 +24,8 @@ import { AcompanhamentoModule } from './acompanhamento/acompanhamento.module.js'
     AuthModule,
     VisitaModule,
     AcompanhamentoModule,
+    PerguntasModule,
+    QuestionariosModule,
   ],
   controllers: [AppController],
   providers: [AppService],
