@@ -1,7 +1,7 @@
 export enum TipoRegistroSaude {
-    VACINACAO = "vacinação",
-    EXAME = "exame",
-    TRATAMENTO = "tratamento"
+    VACINA = 'VACINA',
+    CASTRACAO = 'CASTRACAO',
+    CONSULTA = 'CONSULTA',
 }
 
 export class RegistroSaude {}

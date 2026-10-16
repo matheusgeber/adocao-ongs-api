@@ -5,4 +5,7 @@ export class ListAbrigoDto extends PaginacaoDto {
     @IsOptional()
     @IsString()
     cidade?: string;
+    
+    @IsString()
+    ongId?: string;
 }

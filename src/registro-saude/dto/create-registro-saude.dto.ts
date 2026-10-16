@@ -3,7 +3,7 @@ import { IsDateString, IsEnum, IsString, IsUUID } from "class-validator";
 
 export class CreateRegistroSaudeDto {
     @IsEnum(TipoRegistroSaude, { message: "O tipo de registro de saúde deve ser 'vacinação', 'exame' ou 'tratamento'" })
-    tipo: string;
+    tipo: TipoRegistroSaude;
 
     @IsString()
     descricao: string;

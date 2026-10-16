@@ -25,25 +25,12 @@ export class AnimalRepository {
 
   async findMany(listAnimalDto: ListAnimalDto) {
     const { page, limit, porte, status, ...filtros } = listAnimalDto;
-
     const { skip, take } = paginar({ page, limit });
-
-    let filtroPorte: PrismaPorteAnimal | undefined;
-
-    if (porte) {
-      filtroPorte = porteAnimalMapper[porte];
-    }
-
-    let filtroStatus: PrismaStatusAnimal | undefined;
-
-    if (status) {
-      filtroStatus = statusAnimaMapper[status];
-    }
 
     const where: Prisma.AnimalWhereInput = {
       ...filtros,
-      porte: filtroPorte,
-      status: filtroStatus,
+      porte: porte ? porteAnimalMapper[porte] : undefined,
+      status: status ? statusAnimaMapper[status] : undefined,
     }
 
     const [dados, total] = await this.prisma.$transaction([
