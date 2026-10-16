@@ -1,42 +1,28 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-} from '@nestjs/common';
+import { Controller, Get, Param, ParseUUIDPipe, Query, UseGuards } from '@nestjs/common';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard.js';
+import { RolesGuard } from '../common/guards/roles.guard.js';
+import { Publico } from '../common/decorators/roles.decorator.js';
 import { OngService } from './ong.service.js';
-import { CreateOngDto } from './dto/create-ong.dto.js';
-import { UpdateOngDto } from './dto/update-ong.dto.js';
+import { ListarOngsDto } from './dto/listar-ongs.dto.js';
 
-@Controller('ong')
+@ApiTags('ONGs')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Controller('ongs')
 export class OngController {
   constructor(private readonly ongService: OngService) {}
 
-  @Post()
-  create(@Body() createOngDto: CreateOngDto) {
-    return this.ongService.create(createOngDto);
-  }
-
   @Get()
-  findAll() {
-    return this.ongService.findAll();
+  @Publico()
+  @ApiOperation({ summary: 'Lista ONGs com paginação e filtros por nome e cidade' })
+  listar(@Query() filtros: ListarOngsDto) {
+    return this.ongService.listar(filtros);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.ongService.findOne(id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateOngDto: UpdateOngDto) {
-    return this.ongService.update(id, updateOngDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.ongService.remove(id);
+  @Publico()
+  @ApiOperation({ summary: 'Busca uma ONG pelo id' })
+  buscarPorId(@Param('id', ParseUUIDPipe) id: string) {
+    return this.ongService.buscarPorId(id);
   }
 }
