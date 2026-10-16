@@ -1,4 +1,9 @@
-import { ConflictException, Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { Perfil, Prisma } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import { paginar, respostaPaginada } from '../common/dto/paginacao.dto.js';
@@ -13,7 +18,10 @@ export class UsuarioService {
   constructor(private readonly usuarioRepository: UsuarioRepository) {}
 
   async listar(filtros: ListarUsuariosDto) {
-    const where: Prisma.UsuarioWhereInput = { perfil: filtros.perfil, ativo: filtros.ativo };
+    const where: Prisma.UsuarioWhereInput = {
+      perfil: filtros.perfil,
+      ativo: filtros.ativo,
+    };
     const [dados, total] = await Promise.all([
       this.usuarioRepository.findMany(where, paginar(filtros)),
       this.usuarioRepository.count(where),
@@ -43,20 +51,30 @@ export class UsuarioService {
   }
 
   private async validarOngDoVoluntario(perfil: Perfil, ongId?: string) {
-    if (perfil === Perfil.VOLUNTARIO && !(await this.usuarioRepository.ongExiste(ongId!))) {
+    if (
+      perfil === Perfil.VOLUNTARIO &&
+      !(await this.usuarioRepository.ongExiste(ongId!))
+    ) {
       throw new NotFoundException('ONG do voluntário não encontrada');
     }
   }
 
-    async atualizar(id: string, dto: UpdateUsuarioDto, usuarioLogado: UsuarioAutenticado) {
+  async atualizar(
+    id: string,
+    dto: UpdateUsuarioDto,
+    usuarioLogado: UsuarioAutenticado,
+  ) {
     if (usuarioLogado.perfil !== Perfil.ADMIN && usuarioLogado.id !== id) {
-      throw new ForbiddenException('Você só pode alterar o seu próprio usuário');
+      throw new ForbiddenException(
+        'Você só pode alterar o seu próprio usuário',
+      );
     }
     await this.buscarPorId(id);
 
     if (dto.email) {
       const outro = await this.usuarioRepository.findByEmail(dto.email);
-      if (outro && outro.id !== id) throw new ConflictException('E-mail já cadastrado');
+      if (outro && outro.id !== id)
+        throw new ConflictException('E-mail já cadastrado');
     }
 
     const data: Prisma.UsuarioUncheckedUpdateInput = { email: dto.email };
@@ -66,5 +84,4 @@ export class UsuarioService {
     }
     return this.usuarioRepository.updatePublico(id, data);
   }
-
 }

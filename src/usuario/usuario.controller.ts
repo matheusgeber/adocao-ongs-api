@@ -1,4 +1,14 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Query, UseGuards, Patch } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  Query,
+  UseGuards,
+  Patch,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../common/guards/roles.guard.js';
@@ -19,7 +29,9 @@ export class UsuarioController {
 
   @Get()
   @Roles('ADMIN')
-  @ApiOperation({ summary: 'Lista usuários com paginação e filtros por perfil e ativo' })
+  @ApiOperation({
+    summary: 'Lista usuários com paginação e filtros por perfil e ativo',
+  })
   listar(@Query() filtros: ListarUsuariosDto) {
     return this.usuarioService.listar(filtros);
   }
@@ -39,7 +51,9 @@ export class UsuarioController {
   }
 
   @Patch(':id')
-  @ApiOperation({ summary: 'Atualiza e-mail ou senha (ADMIN ou o próprio usuário)' })
+  @ApiOperation({
+    summary: 'Atualiza e-mail ou senha (ADMIN ou o próprio usuário)',
+  })
   atualizar(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateUsuarioDto,
@@ -47,5 +61,4 @@ export class UsuarioController {
   ) {
     return this.usuarioService.atualizar(id, dto, usuario);
   }
-
 }

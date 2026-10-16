@@ -1,8 +1,20 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Perfil } from '@prisma/client';
-import { IsEmail, IsIn, IsString, IsUUID, MaxLength, MinLength, ValidateIf } from 'class-validator';
+import {
+  IsEmail,
+  IsIn,
+  IsString,
+  IsUUID,
+  MaxLength,
+  MinLength,
+  ValidateIf,
+} from 'class-validator';
 
-export const perfisCriaveis = [Perfil.ADMIN, Perfil.ADOTANTE, Perfil.VOLUNTARIO];
+export const perfisCriaveis = [
+  Perfil.ADMIN,
+  Perfil.ADOTANTE,
+  Perfil.VOLUNTARIO,
+];
 
 export class CreateUsuarioDto {
   @ApiProperty({ example: 'voluntario@patinhas.org' })
@@ -15,11 +27,18 @@ export class CreateUsuarioDto {
   @MaxLength(64)
   senha: string;
 
-  @ApiProperty({ enum: perfisCriaveis, description: 'Usuários de ONG são criados em POST /ongs' })
-  @IsIn(perfisCriaveis, { message: 'Perfil deve ser ADMIN, ADOTANTE ou VOLUNTARIO' })
+  @ApiProperty({
+    enum: perfisCriaveis,
+    description: 'Usuários de ONG são criados em POST /ongs',
+  })
+  @IsIn(perfisCriaveis, {
+    message: 'Perfil deve ser ADMIN, ADOTANTE ou VOLUNTARIO',
+  })
   perfil: Perfil;
 
-  @ApiPropertyOptional({ description: 'Obrigatório quando o perfil é VOLUNTARIO' })
+  @ApiPropertyOptional({
+    description: 'Obrigatório quando o perfil é VOLUNTARIO',
+  })
   @ValidateIf((o) => o.perfil === Perfil.VOLUNTARIO)
   @IsUUID('4', { message: 'Informe o id da ONG do voluntário' })
   ongId?: string;
