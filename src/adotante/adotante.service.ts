@@ -65,7 +65,7 @@ export class AdotanteService {
 
     if (adocaoEmAndamento) {
       throw new BadRequestException(
-        'Não é possível excluir um adotante que tenha uma adoção EM_ANÁLISE ou APROVADA.',
+        'Não é possível excluir um adotante que tenha uma adoção em análise ou aprovada.',
       );
     }
 
