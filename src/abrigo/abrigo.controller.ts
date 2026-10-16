@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Query, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Perfil } from '@prisma/client';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard.js';
@@ -10,6 +10,7 @@ import { AbrigoService } from './abrigo.service.js';
 import { CreateAbrigoDto } from './dto/create-abrigo.dto.js';
 import { UpdateAbrigoDto } from './dto/update-abrigo.dto.js';
 import { ListAbrigoDto } from './dto/list-abrigo.dto.js';
+import { CacheInterceptor } from '@nestjs/cache-manager';
  
 @ApiTags('Abrigos')
 @ApiBearerAuth()
@@ -17,6 +18,7 @@ import { ListAbrigoDto } from './dto/list-abrigo.dto.js';
 export class AbrigoController {
   constructor(private readonly abrigoService: AbrigoService) {}
  
+  @UseInterceptors(CacheInterceptor)
   @Get()
   findAll(@Query() query: ListAbrigoDto) {
     return this.abrigoService.findAll(query);

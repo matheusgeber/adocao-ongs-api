@@ -11,6 +11,8 @@ import { CreateAnimalDto } from './dto/create-animal.dto.js';
 import { UpdateAnimalDto } from './dto/update-animal.dto.js';
 import { TransferirAnimalDto } from './dto/transferir-animal.dto.js';
 import { ListAnimalDto } from './dto/list-animal.dto.js';
+import { CacheInterceptor } from '@nestjs/cache-manager';
+import { UseInterceptors } from '@nestjs/common';
 
 @ApiTags('Animais')
 @ApiBearerAuth()
@@ -18,6 +20,7 @@ import { ListAnimalDto } from './dto/list-animal.dto.js';
 export class AnimalController {
   constructor(private readonly service: AnimalService) {}
 
+  @UseInterceptors(CacheInterceptor)
   @Get()
   findAll(@Query() dto: ListAnimalDto) {
     return this.service.findAll(dto);
