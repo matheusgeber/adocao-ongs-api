@@ -21,6 +21,10 @@ export function paginar({ page = 1, limit = 10 }: PaginacaoDto) {
   return { skip: (page - 1) * limit, take: limit };
 }
 
-export function respostaPaginada<T>(dados: T[], total: number, { page = 1, limit = 10 }: PaginacaoDto) {
+export function respostaPaginada<T>(
+  dados: T[],
+  total: number,
+  { page = 1, limit = 10 }: PaginacaoDto,
+) {
   return { dados, total, page, limit, totalPaginas: Math.ceil(total / limit) };
 }
