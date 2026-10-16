@@ -43,4 +43,33 @@ export class UsuarioRepository {
   update(id: string, data: Prisma.UsuarioUncheckedUpdateInput) {
     return this.prisma.usuario.update({ where: { id }, data });
   }
+
+  findMany(
+    where: Prisma.UsuarioWhereInput,
+    { skip, take }: { skip: number; take: number },
+  ) {
+    return this.prisma.usuario.findMany({
+      where,
+      skip,
+      take,
+      select: usuarioPublico,
+      orderBy: { criadoEm: 'desc' },
+    });
+  }
+
+  count(where: Prisma.UsuarioWhereInput) {
+    return this.prisma.usuario.count({ where });
+  }
+
+  updatePublico(id: string, data: Prisma.UsuarioUncheckedUpdateInput) {
+    return this.prisma.usuario.update({
+      where: { id },
+      data,
+      select: usuarioPublico,
+    });
+  }
+
+  async ongExiste(id: string) {
+    return (await this.prisma.ong.count({ where: { id } })) > 0;
+  }
 }
