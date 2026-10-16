@@ -1,8 +1,12 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Injectable, NotFoundException, ConflictException, ForbiddenException} from '@nestjs/common';
+import { Prisma,Perfil } from '@prisma/client';
 import { paginar, respostaPaginada } from '../common/dto/paginacao.dto.js';
 import { OngRepository } from './ong.repository.js';
 import { ListarOngsDto } from './dto/listar-ongs.dto.js';
+import bcrypt from 'bcrypt';
+import type { UsuarioAutenticado } from '../common/interfaces/usuario-autenticado.interface.js';
+import { CreateOngDto } from './dto/create-ong.dto.js';
+import { UpdateOngDto } from './dto/update-ong.dto.js';
 
 @Injectable()
 export class OngService {
@@ -24,5 +28,35 @@ export class OngService {
     const ong = await this.ongRepository.findById(id);
     if (!ong) throw new NotFoundException('ONG não encontrada');
     return ong;
+  }
+
+    async criar(dto: CreateOngDto) {
+    if (await this.ongRepository.findByCnpj(dto.cnpj)) {
+      throw new ConflictException('CNPJ já cadastrado');
+    }
+    if (await this.ongRepository.emailEmUso(dto.email)) {
+      throw new ConflictException('E-mail já cadastrado');
+    }
+
+    const { email, senha, ...dados } = dto;
+    const senhaHash = await bcrypt.hash(senha, 10);
+    return this.ongRepository.createComUsuario(dados, { email, senha: senhaHash });
+  }
+
+  async atualizar(id: string, dto: UpdateOngDto, usuario: UsuarioAutenticado) {
+    await this.buscarPorId(id);
+    if (usuario.perfil === Perfil.ONG && usuario.ongId !== id) {
+      throw new ForbiddenException('Você só pode alterar a sua própria ONG');
+    }
+    return this.ongRepository.update(id, dto);
+  }
+
+  async remover(id: string) {
+    const ong = await this.buscarPorId(id);
+    const vinculos = await this.ongRepository.contarVinculos(id);
+    if (vinculos && (vinculos._count.animais > 0 || vinculos._count.abrigos > 0)) {
+      throw new ConflictException('A ONG possui animais ou abrigos cadastrados');
+    }
+    await this.ongRepository.excluir(id, ong.usuarioId);
   }
 }
