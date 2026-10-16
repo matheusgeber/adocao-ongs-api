@@ -102,7 +102,7 @@ describe('AdocaoService', () => {
     });
 
     it('aceita vacinas escritas em registros separados e sem acento', async () => {
-      repository.buscarVacinas.mockResolvedValue([{ descricao: 'v10' }, { descricao: 'ANTIRABICA' }]);
+      repository.buscarVacinas.mockResolvedValue([{ descricao: 'v10' }, { descricao: 'ANTIRRABICA' }]);
       await expect(service.solicitar(dto, usuarioAdotante)).resolves.toBeDefined();
     });
 
