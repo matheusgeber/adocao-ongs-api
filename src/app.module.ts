@@ -12,6 +12,8 @@ import { AbrigoModule } from './abrigo/abrigo.module.js';
 import { RegistroSaudeModule } from './registro-saude/registro-saude.module.js';
 import { VisitaModule } from './visita/visita.module.js';
 import { AcompanhamentoModule } from './acompanhamento/acompanhamento.module.js';
+import { PerguntasModule } from './perguntas/perguntas.module.js';
+import { QuestionariosModule } from './questionarios/questionarios.module.js';
 
 @Module({
   imports: [
@@ -26,6 +28,8 @@ import { AcompanhamentoModule } from './acompanhamento/acompanhamento.module.js'
     RegistroSaudeModule,
     VisitaModule,
     AcompanhamentoModule,
+    PerguntasModule,
+    QuestionariosModule,
   ],
   controllers: [AppController],
   providers: [AppService],
