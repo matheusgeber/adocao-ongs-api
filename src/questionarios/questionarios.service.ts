@@ -14,6 +14,22 @@ export class QuestionariosService {
   async create(createQuestionarioDto: CreateQuestionarioDto) {
 
     const { adotanteId, respostas } = createQuestionarioDto;
+
+    const ultimoQuestionario = await this.prisma.questionario.findFirst({
+      where: { adotanteId },
+      orderBy: { dataResposta: 'desc' },
+    });
+
+    if (ultimoQuestionario) {
+      const trintaDiasEmMs = 30 * 24 * 60 * 60 * 1000;
+      const dataAtual = new Date();
+      const dataUltimo = new Date(ultimoQuestionario.dataResposta);
+
+      if (dataAtual.getTime() - dataUltimo.getTime() < trintaDiasEmMs) {
+        throw new BadRequestException('Só é permitido refazer o questionário 30 dias após o envio anterior.');
+      }
+    }
+
     const perguntasAtivas = await this.prisma.pergunta.findMany({
       where: { ativa: true }
     });

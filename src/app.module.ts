@@ -14,6 +14,7 @@ import { VisitaModule } from './visita/visita.module.js';
 import { AcompanhamentoModule } from './acompanhamento/acompanhamento.module.js';
 import { PerguntasModule } from './perguntas/perguntas.module.js';
 import { QuestionariosModule } from './questionarios/questionarios.module.js';
+import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { QuestionariosModule } from './questionarios/questionarios.module.js';
     AcompanhamentoModule,
     PerguntasModule,
     QuestionariosModule,
+    CacheModule.register({isGlobal: true, ttl: 60000})
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -11,4 +11,4 @@ import { AbrigoModule } from '../abrigo/abrigo.module.js';
   providers: [AnimalService, AnimalRepository],
   exports: [AnimalService, AnimalRepository],
 })
-export class AnimalModule {}
+export class AnimalModule { }
