@@ -14,7 +14,6 @@ import type { UsuarioAutenticado } from '../common/interfaces/usuario-autenticad
 import { UpdateUsuarioDto } from './dto/update-usuario.dto.js';
 import { AlterarPerfilDto } from './dto/alterar-perfil.dto.js';
 
-
 @Injectable()
 export class UsuarioService {
   constructor(private readonly usuarioRepository: UsuarioRepository) {}
@@ -91,7 +90,9 @@ export class UsuarioService {
     const usuario = await this.usuarioRepository.findById(id);
     if (!usuario) throw new NotFoundException('Usuário não encontrado');
     if (usuario.ongDona) {
-      throw new ConflictException('Este usuário é responsável por uma ONG e não pode mudar de perfil');
+      throw new ConflictException(
+        'Este usuário é responsável por uma ONG e não pode mudar de perfil',
+      );
     }
     await this.validarOngDoVoluntario(dto.perfil, dto.ongId);
 
@@ -104,7 +105,9 @@ export class UsuarioService {
 
   async desativar(id: string) {
     await this.buscarPorId(id);
-    return this.usuarioRepository.updatePublico(id, { ativo: false, refreshToken: null });
+    return this.usuarioRepository.updatePublico(id, {
+      ativo: false,
+      refreshToken: null,
+    });
   }
-
 }

@@ -1,5 +1,10 @@
-import { Injectable, NotFoundException, ConflictException, ForbiddenException} from '@nestjs/common';
-import { Prisma,Perfil } from '@prisma/client';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+  ForbiddenException,
+} from '@nestjs/common';
+import { Prisma, Perfil } from '@prisma/client';
 import { paginar, respostaPaginada } from '../common/dto/paginacao.dto.js';
 import { OngRepository } from './ong.repository.js';
 import { ListarOngsDto } from './dto/listar-ongs.dto.js';
@@ -14,8 +19,12 @@ export class OngService {
 
   async listar(filtros: ListarOngsDto) {
     const where: Prisma.OngWhereInput = {
-      nome: filtros.nome ? { contains: filtros.nome, mode: 'insensitive' } : undefined,
-      cidade: filtros.cidade ? { contains: filtros.cidade, mode: 'insensitive' } : undefined,
+      nome: filtros.nome
+        ? { contains: filtros.nome, mode: 'insensitive' }
+        : undefined,
+      cidade: filtros.cidade
+        ? { contains: filtros.cidade, mode: 'insensitive' }
+        : undefined,
     };
     const [dados, total] = await Promise.all([
       this.ongRepository.findMany(where, paginar(filtros)),
@@ -30,7 +39,7 @@ export class OngService {
     return ong;
   }
 
-    async criar(dto: CreateOngDto) {
+  async criar(dto: CreateOngDto) {
     if (await this.ongRepository.findByCnpj(dto.cnpj)) {
       throw new ConflictException('CNPJ já cadastrado');
     }
@@ -40,7 +49,10 @@ export class OngService {
 
     const { email, senha, ...dados } = dto;
     const senhaHash = await bcrypt.hash(senha, 10);
-    return this.ongRepository.createComUsuario(dados, { email, senha: senhaHash });
+    return this.ongRepository.createComUsuario(dados, {
+      email,
+      senha: senhaHash,
+    });
   }
 
   async atualizar(id: string, dto: UpdateOngDto, usuario: UsuarioAutenticado) {
@@ -54,8 +66,13 @@ export class OngService {
   async remover(id: string) {
     const ong = await this.buscarPorId(id);
     const vinculos = await this.ongRepository.contarVinculos(id);
-    if (vinculos && (vinculos._count.animais > 0 || vinculos._count.abrigos > 0)) {
-      throw new ConflictException('A ONG possui animais ou abrigos cadastrados');
+    if (
+      vinculos &&
+      (vinculos._count.animais > 0 || vinculos._count.abrigos > 0)
+    ) {
+      throw new ConflictException(
+        'A ONG possui animais ou abrigos cadastrados',
+      );
     }
     await this.ongRepository.excluir(id, ong.usuarioId);
   }

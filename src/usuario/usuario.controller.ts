@@ -66,7 +66,10 @@ export class UsuarioController {
   @Patch(':id/perfil')
   @Roles('ADMIN')
   @ApiOperation({ summary: 'Altera o perfil de um usuário' })
-  alterarPerfil(@Param('id', ParseUUIDPipe) id: string, @Body() dto: AlterarPerfilDto) {
+  alterarPerfil(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: AlterarPerfilDto,
+  ) {
     return this.usuarioService.alterarPerfil(id, dto);
   }
 

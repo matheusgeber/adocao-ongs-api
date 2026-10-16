@@ -1,5 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsString, Matches, MaxLength, MinLength } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsString,
+  Matches,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 
 export class CreateOngDto {
   @ApiProperty({ example: 'Patinhas Felizes' })
@@ -8,12 +15,20 @@ export class CreateOngDto {
   @MaxLength(120)
   nome: string;
 
-  @ApiProperty({ example: '12345678000190', description: 'Somente os 14 dígitos' })
+  @ApiProperty({
+    example: '12345678000190',
+    description: 'Somente os 14 dígitos',
+  })
   @Matches(/^\d{14}$/, { message: 'O CNPJ deve ter 14 dígitos numéricos' })
   cnpj: string;
 
-  @ApiProperty({ example: '21987654321', description: 'DDD + número, só dígitos' })
-  @Matches(/^\d{10,11}$/, { message: 'O telefone deve ter 10 ou 11 dígitos numéricos' })
+  @ApiProperty({
+    example: '21987654321',
+    description: 'DDD + número, só dígitos',
+  })
+  @Matches(/^\d{10,11}$/, {
+    message: 'O telefone deve ter 10 ou 11 dígitos numéricos',
+  })
   telefone: string;
 
   @ApiProperty({ example: 'Rio de Janeiro' })
@@ -21,7 +36,10 @@ export class CreateOngDto {
   @IsNotEmpty()
   cidade: string;
 
-  @ApiProperty({ example: 'contato@patinhas.org', description: 'Login do usuário da ONG' })
+  @ApiProperty({
+    example: 'contato@patinhas.org',
+    description: 'Login do usuário da ONG',
+  })
   @IsEmail({}, { message: 'E-mail inválido' })
   email: string;
 

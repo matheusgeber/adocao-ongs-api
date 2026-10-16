@@ -1,4 +1,17 @@
-import { Controller, Get, Param, ParseUUIDPipe, Query, UseGuards, Body, Delete, HttpCode, HttpStatus, Patch, Post } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Query,
+  UseGuards,
+  Body,
+  Delete,
+  HttpCode,
+  HttpStatus,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { ApiOperation, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../common/guards/roles.guard.js';
@@ -18,7 +31,9 @@ export class OngController {
 
   @Get()
   @Publico()
-  @ApiOperation({ summary: 'Lista ONGs com paginação e filtros por nome e cidade' })
+  @ApiOperation({
+    summary: 'Lista ONGs com paginação e filtros por nome e cidade',
+  })
   listar(@Query() filtros: ListarOngsDto) {
     return this.ongService.listar(filtros);
   }
@@ -58,5 +73,4 @@ export class OngController {
   remover(@Param('id', ParseUUIDPipe) id: string) {
     return this.ongService.remover(id);
   }
-
 }

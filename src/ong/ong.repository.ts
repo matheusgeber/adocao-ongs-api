@@ -12,8 +12,16 @@ export class OngRepository {
     });
   }
 
-    findMany(where: Prisma.OngWhereInput, { skip, take }: { skip: number; take: number }) {
-    return this.prisma.ong.findMany({ where, skip, take, orderBy: { nome: 'asc' } });
+  findMany(
+    where: Prisma.OngWhereInput,
+    { skip, take }: { skip: number; take: number },
+  ) {
+    return this.prisma.ong.findMany({
+      where,
+      skip,
+      take,
+      orderBy: { nome: 'asc' },
+    });
   }
 
   count(where: Prisma.OngWhereInput) {
