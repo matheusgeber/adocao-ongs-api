@@ -1,4 +1,9 @@
-import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import jwt from 'jsonwebtoken';
 import { PUBLICO_KEY } from '../decorators/roles.decorator.js';
@@ -21,8 +26,15 @@ export class JwtAuthGuard implements CanActivate {
     }
 
     try {
-      const payload = jwt.verify(token, process.env.JWT_SECRET as string) as jwt.JwtPayload;
-      req.usuario = { id: payload.sub, perfil: payload.perfil, ongId: payload.ongId ?? null };
+      const payload = jwt.verify(
+        token,
+        process.env.JWT_SECRET as string,
+      ) as jwt.JwtPayload;
+      req.usuario = {
+        id: payload.sub,
+        perfil: payload.perfil,
+        ongId: payload.ongId ?? null,
+      };
       return true;
     } catch {
       throw new UnauthorizedException('Token inválido ou expirado');

@@ -34,7 +34,10 @@ export class UsuarioRepository {
   }
 
   findPublicoById(id: string) {
-    return this.prisma.usuario.findUnique({ where: { id }, select: usuarioPublico });
+    return this.prisma.usuario.findUnique({
+      where: { id },
+      select: usuarioPublico,
+    });
   }
 
   update(id: string, data: Prisma.UsuarioUncheckedUpdateInput) {

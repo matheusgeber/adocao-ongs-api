@@ -1,4 +1,9 @@
-import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  ForbiddenException,
+  Injectable,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import type { Perfil } from '@prisma/client';
 import { ROLES_KEY } from '../decorators/roles.decorator.js';
@@ -16,7 +21,9 @@ export class RolesGuard implements CanActivate {
 
     const { usuario } = context.switchToHttp().getRequest();
     if (!usuario || !perfis.includes(usuario.perfil)) {
-      throw new ForbiddenException('Seu perfil não tem permissão para esta ação');
+      throw new ForbiddenException(
+        'Seu perfil não tem permissão para esta ação',
+      );
     }
     return true;
   }
