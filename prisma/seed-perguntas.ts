@@ -1,4 +1,5 @@
 import { PrismaClient, CategoriaPergunta } from '@prisma/client';
+import bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 
 async function main() {
@@ -21,7 +22,28 @@ async function main() {
         perguntasCriadas.push(pergunta);
     }
 
-    console.log('Criand seed de adotantes, usuários e questionários...');
+    console.log('Gerando hash da senha padrão');
+    const senhaHash = await bcrypt.hash('senha', 10);
+
+    console.log('Criando usuário ADMIN...');
+    await prisma.usuario.create({
+        data: {
+            email: 'admin@teste.com',
+            senha: senhaHash,
+            perfil: 'ADMIN'
+        }
+    });
+
+    console.log('Criando usuário ONG...');
+    await prisma.usuario.create({
+        data: {
+            email: 'ong@teste.com',
+            senha: senhaHash,
+            perfil: 'ONG'
+        }
+    });
+
+    console.log('Criando seed de adotantes, usuários ADOTANTE e questionários...');
     for (let i = 1; i <= 3; i++) {
 
         const adotante = await prisma.adotante.create({
@@ -32,7 +54,7 @@ async function main() {
                 usuario: {
                     create: {
                         email: `adotante${i}@teste.com`,
-                        senha: 'senha',
+                        senha: senhaHash,
                         perfil: 'ADOTANTE'
                     }
                 }
