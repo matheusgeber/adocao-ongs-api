@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt';
 import { UsuarioRepository } from '../usuario/usuario.repository.js';
 import { RegistrarDto } from './dto/registrar.dto.js';
 
+
 @Injectable()
 export class AuthService {
   constructor(private readonly usuarioRepository: UsuarioRepository) {}
