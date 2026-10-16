@@ -5,7 +5,7 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../common/guards/roles.guard.js';
 import { Roles } from '../common/decorators/roles.decorator.js';
 import { UsuarioLogado } from '../common/decorators/usuario-logado.decorator.js';
-import { UsuarioAutenticado } from '../common/interfaces/usuario-autenticado.interface.js';
+import type { UsuarioAutenticado } from '../common/interfaces/usuario-autenticado.interface.js';
 import { AbrigoService } from './abrigo.service.js';
 import { CreateAbrigoDto } from './dto/create-abrigo.dto.js';
 import { UpdateAbrigoDto } from './dto/update-abrigo.dto.js';

@@ -22,6 +22,7 @@
     "test:e2e": "vitest run --config ./vitest.config.e2e.ts",
     "seed:adocoes": "node prisma/seed-adocoes.ts",
     "seed:perguntas": "node prisma/seed-perguntas.ts",
+    "seed:animais": "node prisma/seed-animal.ts",
     "postinstall": "prisma skills sync || exit 0"
   },
   "dependencies": {

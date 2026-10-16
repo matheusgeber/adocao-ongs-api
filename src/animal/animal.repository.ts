@@ -76,4 +76,10 @@ export class AnimalRepository {
   delete(id: string) {
     return this.prisma.animal.delete({ where: { id } });
   }
+
+  countNaoAdotadosPorAbrigo(abrigoId: string) {
+    return this.prisma.animal.count({
+      where: { abrigoId, status: { not: PrismaStatusAnimal.ADOTADO } },
+    });
+  }
 }

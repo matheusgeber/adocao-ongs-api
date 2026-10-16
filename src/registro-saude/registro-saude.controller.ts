@@ -5,7 +5,7 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../common/guards/roles.guard.js';
 import { Roles } from '../common/decorators/roles.decorator.js';
 import { UsuarioLogado } from '../common/decorators/usuario-logado.decorator.js';
-import { UsuarioAutenticado } from '../common/interfaces/usuario-autenticado.interface.js';
+import type { UsuarioAutenticado } from '../common/interfaces/usuario-autenticado.interface.js';
 import { RegistroSaudeService } from './registro-saude.service.js';
 import { CreateRegistroSaudeDto } from './dto/create-registro-saude.dto.js';
 import { UpdateRegistroSaudeDto } from './dto/update-registro-saude.dto.js';
