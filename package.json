@@ -23,7 +23,8 @@
     "seed:adocoes": "node prisma/seed-adocoes.ts",
     "seed:perguntas": "node prisma/seed-perguntas.ts",
     "seed:animais": "node prisma/seed-animal.ts",
-    "postinstall": "prisma skills sync || exit 0"
+    "postinstall": "prisma skills sync || exit 0",
+    "seed:usuarios": "node prisma/seed-usuarios.ts"
   },
   "dependencies": {
     "@nestjs/cache-manager": "^12.0.1",
