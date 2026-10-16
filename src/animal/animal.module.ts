@@ -10,4 +10,4 @@ import { OngModule } from '../ong/ong.module.js';
   providers: [AnimalService, AnimalRepository],
   exports: [AnimalService, AnimalRepository],
 })
-export class AnimalModule {}
+export class AnimalModule { }

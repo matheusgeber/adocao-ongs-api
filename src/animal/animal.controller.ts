@@ -5,7 +5,7 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../common/guards/roles.guard.js';
 import { Roles } from '../common/decorators/roles.decorator.js';
 import { UsuarioLogado } from '../common/decorators/usuario-logado.decorator.js';
-import { UsuarioAutenticado } from '../common/interfaces/usuario-autenticado.interface.js';
+import type { UsuarioAutenticado } from '../common/interfaces/usuario-autenticado.interface.js';
 import { AnimalService } from './animal.service.js';
 import { CreateAnimalDto } from './dto/create-animal.dto.js';
 import { UpdateAnimalDto } from './dto/update-animal.dto.js';
@@ -16,7 +16,7 @@ import { ListAnimalDto } from './dto/list-animal.dto.js';
 @ApiBearerAuth()
 @Controller('animais')
 export class AnimalController {
-  constructor(private readonly service: AnimalService) {}
+  constructor(private readonly service: AnimalService) { }
 
   @Get()
   findAll(@Query() dto: ListAnimalDto) {

@@ -5,28 +5,28 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../common/guards/roles.guard.js';
 import { Roles } from '../common/decorators/roles.decorator.js';
 import { UsuarioLogado } from '../common/decorators/usuario-logado.decorator.js';
-import { UsuarioAutenticado } from '../common/interfaces/usuario-autenticado.interface.js';
+import type { UsuarioAutenticado } from '../common/interfaces/usuario-autenticado.interface.js';
 import { AbrigoService } from './abrigo.service.js';
 import { CreateAbrigoDto } from './dto/create-abrigo.dto.js';
 import { UpdateAbrigoDto } from './dto/update-abrigo.dto.js';
 import { ListAbrigoDto } from './dto/list-abrigo.dto.js';
- 
+
 @ApiTags('Abrigos')
 @ApiBearerAuth()
 @Controller('abrigos')
 export class AbrigoController {
-  constructor(private readonly abrigoService: AbrigoService) {}
- 
+  constructor(private readonly abrigoService: AbrigoService) { }
+
   @Get()
   findAll(@Query() query: ListAbrigoDto) {
     return this.abrigoService.findAll(query);
   }
- 
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.abrigoService.findOne(id);
   }
- 
+
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Perfil.ONG)
   @Post()
@@ -36,7 +36,7 @@ export class AbrigoController {
   ) {
     return this.abrigoService.create(dto, usuario);
   }
- 
+
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Perfil.ONG)
   @Patch(':id')
@@ -47,7 +47,7 @@ export class AbrigoController {
   ) {
     return this.abrigoService.update(id, dto, usuario);
   }
- 
+
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Perfil.ONG)
   @Delete(':id')

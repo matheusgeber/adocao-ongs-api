@@ -1,11 +1,11 @@
-import {Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Query,UseGuards} from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Perfil } from '@prisma/client';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../common/guards/roles.guard.js';
 import { Roles } from '../common/decorators/roles.decorator.js';
 import { UsuarioLogado } from '../common/decorators/usuario-logado.decorator.js';
-import { UsuarioAutenticado } from '../common/interfaces/usuario-autenticado.interface.js';
+import type { UsuarioAutenticado } from '../common/interfaces/usuario-autenticado.interface.js';
 import { RegistroSaudeService } from './registro-saude.service.js';
 import { CreateRegistroSaudeDto } from './dto/create-registro-saude.dto.js';
 import { UpdateRegistroSaudeDto } from './dto/update-registro-saude.dto.js';
@@ -16,7 +16,7 @@ import { ListRegistroSaudeDto } from './dto/list-registro-saude.dto.js';
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('registros-saude')
 export class RegistroSaudeController {
-  constructor(private readonly registroSaudeService: RegistroSaudeService) {}
+  constructor(private readonly registroSaudeService: RegistroSaudeService) { }
 
   @Roles(Perfil.ADMIN, Perfil.ONG, Perfil.VOLUNTARIO)
   @Get()

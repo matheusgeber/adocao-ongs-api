@@ -3,7 +3,7 @@ const prisma = new PrismaClient();
 
 async function main() {
     console.log('Criando seed de perguntas...');
-    const perguntas = [
+    const dadosPerguntas = [
         { texto: 'Mora em casa ou apartamento?', categoria: CategoriaPergunta.ESPACO, peso: 2 },
         { texto: 'Possui redes de proteção nas janelas?', categoria: CategoriaPergunta.ESPACO, peso: 5 },
         { texto: 'O local possui quintal murado?', categoria: CategoriaPergunta.ESPACO, peso: 3 },
@@ -15,12 +15,60 @@ async function main() {
         { texto: 'O que fará com o animal em caso de viagem ou mudança de casa?', categoria: CategoriaPergunta.EXPERIENCIA, peso: 5 },
         { texto: 'Como planeia fazer a adaptação do novo animal?', categoria: CategoriaPergunta.EXPERIENCIA, peso: 4 },
     ];
-
-    for (const p of perguntas) {
-        await prisma.pergunta.create({ data: p });
+    const perguntasCriadas = [];
+    for (const p of dadosPerguntas) {
+        const pergunta = await prisma.pergunta.create({ data: p });
+        perguntasCriadas.push(pergunta);
     }
 
-    console.log('Seed de perguntas concluído com sucesso!');
+    console.log('Criand seed de adotantes, usuários e questionários...');
+    for (let i = 1; i <= 3; i++) {
+
+        const adotante = await prisma.adotante.create({
+            data: {
+                nome: `Adotante Teste ${i}`,
+                cpf: `1112223334${i}`,
+                telefone: `99988877${i}`,
+                usuario: {
+                    create: {
+                        email: `adotante${i}@teste.com`,
+                        senha: 'senha',
+                        perfil: 'ADOTANTE'
+                    }
+                }
+            }
+        });
+
+        const respostasParaCriar = perguntasCriadas.map(p => ({
+            perguntaId: p.id,
+            valor: Math.floor(Math.random() * 5) + 1
+        }));
+
+        let pontuacaoAbsoluta = 0;
+        let pontuacaoMaxima = 0;
+        perguntasCriadas.forEach((p, index) => {
+            pontuacaoAbsoluta += respostasParaCriar[index].valor * p.peso;
+            pontuacaoMaxima += 5 * p.peso;
+        });
+        const pontuacaoFinal = Math.round((pontuacaoAbsoluta / pontuacaoMaxima) * 100);
+
+        await prisma.questionario.create({
+            data: {
+                adotanteId: adotante.id,
+                pontuacao: pontuacaoFinal,
+                respostas: {
+                    create: respostasParaCriar
+                }
+            }
+        });
+
+        await prisma.adotante.update({
+            where: { id: adotante.id },
+            data: { pontuacaoQuestionario: pontuacaoFinal }
+        });
+    }
+
+    console.log('Seed concluído com sucesso!');
 }
 
 main()
