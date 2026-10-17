@@ -74,7 +74,10 @@ export class AnimalRepository {
   }
 
   delete(id: string) {
-    return this.prisma.animal.delete({ where: { id } });
+    return this.prisma.$transaction([
+      this.prisma.registroSaude.deleteMany({ where: { animalId: id } }),
+      this.prisma.animal.delete({ where: { id } }),
+    ]);
   }
 
   countNaoAdotadosPorAbrigo(abrigoId: string) {

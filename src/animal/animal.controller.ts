@@ -59,7 +59,7 @@ export class AnimalController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Perfil.ONG)
   @Patch(':id/transferir')
-  @ApiOperation({ summary: 'Transfere a posse de um animal para outra ONG.' })
+  @ApiOperation({ summary: 'Transfere a posse de um animal para outro abrigo.' })
   transferir(
     @Param('id') id: string,
     @Body() dto: TransferirAnimalDto,
