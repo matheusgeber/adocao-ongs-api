@@ -6,12 +6,9 @@ import {
   ParseUUIDPipe,
   Post,
   Query,
-  UseGuards,
   Patch,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../common/guards/jwt-auth.guard.js';
-import { RolesGuard } from '../common/guards/roles.guard.js';
 import { Roles } from '../common/decorators/roles.decorator.js';
 import { UsuarioService } from './usuario.service.js';
 import { CreateUsuarioDto } from './dto/create-usuario.dto.js';
@@ -23,7 +20,6 @@ import { AlterarPerfilDto } from './dto/alterar-perfil.dto.js';
 
 @ApiTags('Usuários')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('usuarios')
 export class UsuarioController {
   constructor(private readonly usuarioService: UsuarioService) {}

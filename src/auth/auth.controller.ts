@@ -5,14 +5,12 @@ import {
   HttpCode,
   HttpStatus,
   Post,
-  UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service.js';
 import { RegistrarDto } from './dto/registrar.dto.js';
 import { LoginDto } from './dto/login.dto.js';
 import { RefreshTokenDto } from './dto/refresh-token.dto.js';
-import { JwtAuthGuard } from '../common/guards/jwt-auth.guard.js';
 import { Publico } from '../common/decorators/roles.decorator.js';
 import { UsuarioLogado } from '../common/decorators/usuario-logado.decorator.js';
 import type { UsuarioAutenticado } from '../common/interfaces/usuario-autenticado.interface.js';
@@ -52,7 +50,6 @@ export class AuthController {
   @Post('logout')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Invalida o refresh token do usuário logado' })
   logout(@UsuarioLogado() usuario: UsuarioAutenticado) {
     return this.authService.logout(usuario.id);
@@ -60,7 +57,6 @@ export class AuthController {
 
   @Get('me')
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Dados do usuário logado' })
   me(@UsuarioLogado() usuario: UsuarioAutenticado) {
     return this.authService.me(usuario.id);
