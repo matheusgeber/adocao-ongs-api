@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Perfil } from '@prisma/client';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../common/guards/roles.guard.js';
@@ -20,18 +20,21 @@ export class RegistroSaudeController {
 
   @Roles(Perfil.ADMIN, Perfil.ONG, Perfil.VOLUNTARIO)
   @Get()
+  @ApiOperation({ summary: 'Lista todos os registros de saúde.' })
   findAll(@Query() query: ListRegistroSaudeDto) {
     return this.registroSaudeService.findAll(query);
   }
 
   @Roles(Perfil.ADMIN, Perfil.ONG, Perfil.VOLUNTARIO)
   @Get(':id')
+  @ApiOperation({ summary: 'Obtém os detalhes de um registro de saúde específico.' })
   findOne(@Param('id') id: string) {
     return this.registroSaudeService.findOne(id);
   }
 
   @Roles(Perfil.ONG, Perfil.VOLUNTARIO)
   @Post()
+  @ApiOperation({ summary: 'Cria um novo registro de saúde.' })
   create(
     @Body() dto: CreateRegistroSaudeDto,
     @UsuarioLogado() usuario: UsuarioAutenticado,
@@ -41,6 +44,7 @@ export class RegistroSaudeController {
 
   @Roles(Perfil.ONG, Perfil.VOLUNTARIO)
   @Patch(':id')
+  @ApiOperation({ summary: 'Atualiza os dados de um registro de saúde.' })
   update(
     @Param('id') id: string,
     @Body() dto: UpdateRegistroSaudeDto,
@@ -52,6 +56,7 @@ export class RegistroSaudeController {
   @Roles(Perfil.ONG)
   @Delete(':id')
   @HttpCode(204)
+  @ApiOperation({ summary: 'Remove um registro de saúde.' })
   remove(
     @Param('id') id: string,
     @UsuarioLogado() usuario: UsuarioAutenticado,

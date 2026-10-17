@@ -19,7 +19,7 @@ export class CreateAnimalDto {
     raca: string;
 
     @IsBoolean()
-    cadastrado: boolean;
+    castrado: boolean;
 
     @IsUUID()
     abrigoId: string;

@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Query, UseGuards, UseInterceptors } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Perfil } from '@prisma/client';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../common/guards/roles.guard.js';
@@ -20,11 +20,13 @@ export class AbrigoController {
 
   @UseInterceptors(CacheInterceptor)
   @Get()
+  @ApiOperation({ summary: 'Lista todos os abrigos.' })
   findAll(@Query() query: ListAbrigoDto) {
     return this.abrigoService.findAll(query);
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Obtém os detalhes de um abrigo específico.' })
   findOne(@Param('id') id: string) {
     return this.abrigoService.findOne(id);
   }
@@ -32,6 +34,7 @@ export class AbrigoController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Perfil.ONG)
   @Post()
+  @ApiOperation({ summary: 'Cria um novo abrigo.' })
   create(
     @Body() dto: CreateAbrigoDto,
     @UsuarioLogado() usuario: UsuarioAutenticado,
@@ -42,6 +45,7 @@ export class AbrigoController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Perfil.ONG)
   @Patch(':id')
+  @ApiOperation({ summary: 'Atualiza os dados de um abrigo.' })
   update(
     @Param('id') id: string,
     @Body() dto: UpdateAbrigoDto,
@@ -54,6 +58,7 @@ export class AbrigoController {
   @Roles(Perfil.ONG)
   @Delete(':id')
   @HttpCode(204)
+  @ApiOperation({ summary: 'Remove um abrigo.' })
   remove(
     @Param('id') id: string,
     @UsuarioLogado() usuario: UsuarioAutenticado,

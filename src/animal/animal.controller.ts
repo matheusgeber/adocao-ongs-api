@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Perfil } from '@prisma/client';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../common/guards/roles.guard.js';
@@ -22,11 +22,13 @@ export class AnimalController {
 
   @UseInterceptors(CacheInterceptor)
   @Get()
+  @ApiOperation({ summary: 'Lista todos os animais.' })
   findAll(@Query() dto: ListAnimalDto) {
     return this.service.findAll(dto);
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Obtém os detalhes de um animal específico.' })
   findOne(@Param('id') id: string) {
     return this.service.findOne(id);
   }
@@ -34,6 +36,7 @@ export class AnimalController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Perfil.ONG)
   @Post()
+  @ApiOperation({ summary: 'Cria um novo animal.' })
   create(
     @Body() dto: CreateAnimalDto,
     @UsuarioLogado() usuario: UsuarioAutenticado,
@@ -44,6 +47,7 @@ export class AnimalController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Perfil.ONG)
   @Patch(':id')
+  @ApiOperation({ summary: 'Atualiza os dados de um animal.' })
   update(
     @Param('id') id: string,
     @Body() dto: UpdateAnimalDto,
@@ -55,6 +59,7 @@ export class AnimalController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Perfil.ONG)
   @Patch(':id/transferir')
+  @ApiOperation({ summary: 'Transfere a posse de um animal para outra ONG.' })
   transferir(
     @Param('id') id: string,
     @Body() dto: TransferirAnimalDto,
@@ -67,6 +72,7 @@ export class AnimalController {
   @Roles(Perfil.ONG, Perfil.ADMIN)
   @Delete(':id')
   @HttpCode(204)
+  @ApiOperation({ summary: 'Remove um animal.' })
   remove(
     @Param('id') id: string,
     @UsuarioLogado() usuario: UsuarioAutenticado,
