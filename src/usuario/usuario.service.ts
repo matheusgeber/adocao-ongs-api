@@ -86,17 +86,26 @@ export class UsuarioService {
     return this.usuarioRepository.updatePublico(id, data);
   }
 
-  async alterarPerfil(id: string, dto: AlterarPerfilDto, usuarioLogado: UsuarioAutenticado) {
+  async alterarPerfil(
+    id: string,
+    dto: AlterarPerfilDto,
+    usuarioLogado: UsuarioAutenticado,
+  ) {
     if (usuarioLogado.id === id) {
-      throw new ForbiddenException('Você não pode alterar o seu próprio perfil');
+      throw new ForbiddenException(
+        'Você não pode alterar o seu próprio perfil',
+      );
     }
 
     const usuario = await this.usuarioRepository.findById(id);
     if (!usuario) throw new NotFoundException('Usuário não encontrado');
     if (usuario.ongDona) {
-      throw new ConflictException('Este usuário é responsável por uma ONG e não pode mudar de perfil');
+      throw new ConflictException(
+        'Este usuário é responsável por uma ONG e não pode mudar de perfil',
+      );
     }
-    if (dto.perfil !== Perfil.ADMIN) await this.garantirOutroAdminAtivo(usuario);
+    if (dto.perfil !== Perfil.ADMIN)
+      await this.garantirOutroAdminAtivo(usuario);
     await this.validarOngDoVoluntario(dto.perfil, dto.ongId);
 
     return this.usuarioRepository.updatePublico(id, {
@@ -109,14 +118,21 @@ export class UsuarioService {
   async desativar(id: string) {
     const usuario = await this.buscarPorId(id);
     await this.garantirOutroAdminAtivo(usuario);
-    return this.usuarioRepository.updatePublico(id, { ativo: false, refreshToken: null });
+    return this.usuarioRepository.updatePublico(id, {
+      ativo: false,
+      refreshToken: null,
+    });
   }
 
-
-  private async garantirOutroAdminAtivo(usuario: { perfil: Perfil; ativo: boolean }) {
+  private async garantirOutroAdminAtivo(usuario: {
+    perfil: Perfil;
+    ativo: boolean;
+  }) {
     if (usuario.perfil !== Perfil.ADMIN || !usuario.ativo) return;
     if ((await this.usuarioRepository.contarAdminsAtivos()) <= 1) {
-      throw new ConflictException('O sistema precisa de pelo menos um ADMIN ativo');
+      throw new ConflictException(
+        'O sistema precisa de pelo menos um ADMIN ativo',
+      );
     }
   }
 }

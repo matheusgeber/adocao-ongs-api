@@ -4,7 +4,11 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 const SENHA_PADRAO = 'Senha@123';
 
-async function usuario(email: string, perfil: 'ADMIN' | 'ONG' | 'VOLUNTARIO', ongId?: string) {
+async function usuario(
+  email: string,
+  perfil: 'ADMIN' | 'ONG' | 'VOLUNTARIO',
+  ongId?: string,
+) {
   const senha = await bcrypt.hash(SENHA_PADRAO, 10);
   return prisma.usuario.upsert({
     where: { email },
@@ -29,11 +33,21 @@ async function main() {
   await usuario('admin@adocao.local', 'ADMIN');
 
   const patasAmigas = await ong(
-    { nome: 'ONG Patas Amigas', cnpj: '12345678000190', telefone: '21999990000', cidade: 'Rio de Janeiro' },
+    {
+      nome: 'ONG Patas Amigas',
+      cnpj: '12345678000190',
+      telefone: '21999990000',
+      cidade: 'Rio de Janeiro',
+    },
     'ong@adocao.local',
   );
   await ong(
-    { nome: 'ONG Focinhos do Bem', cnpj: '98765432000110', telefone: '21988880000', cidade: 'Niterói' },
+    {
+      nome: 'ONG Focinhos do Bem',
+      cnpj: '98765432000110',
+      telefone: '21988880000',
+      cidade: 'Niterói',
+    },
     'ong2@adocao.local',
   );
 

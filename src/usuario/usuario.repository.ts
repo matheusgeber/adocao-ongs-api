@@ -81,7 +81,9 @@ export class UsuarioRepository {
     });
   }
 
-    contarAdminsAtivos() {
-    return this.prisma.usuario.count({ where: { perfil: 'ADMIN', ativo: true } });
+  contarAdminsAtivos() {
+    return this.prisma.usuario.count({
+      where: { perfil: 'ADMIN', ativo: true },
+    });
   }
 }

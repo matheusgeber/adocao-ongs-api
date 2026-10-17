@@ -3,7 +3,7 @@ import {
   Injectable,
   UnauthorizedException,
   HttpException,
-  HttpStatus
+  HttpStatus,
 } from '@nestjs/common';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
@@ -27,7 +27,6 @@ const contaBloqueada = (minutos: number) =>
     HttpStatus.LOCKED,
   );
 
-
 @Injectable()
 export class AuthService {
   constructor(private readonly usuarioRepository: UsuarioRepository) {}
@@ -49,12 +48,15 @@ export class AuthService {
     if (!usuario) throw new UnauthorizedException('E-mail ou senha inválidos');
 
     if (usuario.bloqueadoAte && usuario.bloqueadoAte > new Date()) {
-      const restante = Math.ceil((usuario.bloqueadoAte.getTime() - Date.now()) / 60_000);
+      const restante = Math.ceil(
+        (usuario.bloqueadoAte.getTime() - Date.now()) / 60_000,
+      );
       throw contaBloqueada(restante);
     }
 
     if (!(await bcrypt.compare(dto.senha, usuario.senha))) {
-      const { tentativasLogin } = await this.usuarioRepository.incrementarTentativasLogin(usuario.id);
+      const { tentativasLogin } =
+        await this.usuarioRepository.incrementarTentativasLogin(usuario.id);
       if (tentativasLogin >= LIMITE_TENTATIVAS) {
         await this.usuarioRepository.update(usuario.id, {
           tentativasLogin: 0,
@@ -68,11 +70,13 @@ export class AuthService {
     if (!usuario.ativo) throw new UnauthorizedException('Usuário desativado');
 
     if (usuario.tentativasLogin > 0 || usuario.bloqueadoAte) {
-      await this.usuarioRepository.update(usuario.id, { tentativasLogin: 0, bloqueadoAte: null });
+      await this.usuarioRepository.update(usuario.id, {
+        tentativasLogin: 0,
+        bloqueadoAte: null,
+      });
     }
     return this.gerarTokens(usuario);
   }
-
 
   private async gerarTokens(usuario: UsuarioComOng) {
     const accessToken = jwt.sign(

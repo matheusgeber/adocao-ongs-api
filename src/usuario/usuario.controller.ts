@@ -74,7 +74,6 @@ export class UsuarioController {
     return this.usuarioService.alterarPerfil(id, dto, usuario);
   }
 
-
   @Patch(':id/desativar')
   @Roles('ADMIN')
   @ApiOperation({ summary: 'Desativa um usuário e encerra as sessões dele' })

@@ -75,5 +75,4 @@ export class OngRepository {
       data: { ativo: false, refreshToken: null },
     });
   }
-
 }

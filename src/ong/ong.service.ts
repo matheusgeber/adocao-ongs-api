@@ -26,7 +26,6 @@ export class OngService {
         ? { contains: filtros.cidade, mode: 'insensitive' }
         : undefined,
       usuario: { ativo: true },
-
     };
     const [dados, total] = await Promise.all([
       this.ongRepository.findMany(where, paginar(filtros)),
@@ -67,7 +66,8 @@ export class OngService {
 
   async remover(id: string) {
     const ong = await this.buscarPorId(id);
-    if (!ong.usuario.ativo) throw new ConflictException('A ONG já está desativada');
+    if (!ong.usuario.ativo)
+      throw new ConflictException('A ONG já está desativada');
 
     const [animaisEmProcesso, acompanhamentosPendentes] =
       await this.ongRepository.contarPendencias(id);
@@ -84,5 +84,4 @@ export class OngService {
 
     await this.ongRepository.desativar(id, ong.usuarioId);
   }
-
 }
