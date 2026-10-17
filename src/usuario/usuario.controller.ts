@@ -69,9 +69,11 @@ export class UsuarioController {
   alterarPerfil(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: AlterarPerfilDto,
+    @UsuarioLogado() usuario: UsuarioAutenticado,
   ) {
-    return this.usuarioService.alterarPerfil(id, dto);
+    return this.usuarioService.alterarPerfil(id, dto, usuario);
   }
+
 
   @Patch(':id/desativar')
   @Roles('ADMIN')

@@ -80,4 +80,8 @@ export class UsuarioRepository {
       select: { tentativasLogin: true },
     });
   }
+
+    contarAdminsAtivos() {
+    return this.prisma.usuario.count({ where: { perfil: 'ADMIN', ativo: true } });
+  }
 }
