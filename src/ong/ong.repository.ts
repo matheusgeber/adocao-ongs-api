@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { Prisma } from '@prisma/client';
+import { STATUS_ACOMPANHAMENTO } from '../acompanhamento/status-acompanhamento.js';
 
 @Injectable()
 export class OngRepository {
@@ -29,7 +30,10 @@ export class OngRepository {
   }
 
   findById(id: string) {
-    return this.prisma.ong.findUnique({ where: { id } });
+    return this.prisma.ong.findUnique({
+      where: { id },
+      include: { usuario: { select: { ativo: true } } },
+    });
   }
 
   findByCnpj(cnpj: string) {
@@ -53,24 +57,23 @@ export class OngRepository {
     return this.prisma.ong.update({ where: { id }, data });
   }
 
-  contarVinculos(id: string) {
-    return this.prisma.ong.findUnique({
-      where: { id },
-      select: { _count: { select: { animais: true, abrigos: true } } },
-    });
-  }
-
-  excluir(id: string, usuarioId: string) {
-    return this.prisma.$transaction([
-      this.prisma.usuario.updateMany({
-        where: { ongId: id },
-        data: { ongId: null, ativo: false, refreshToken: null },
-      }),
-      this.prisma.ong.delete({ where: { id } }),
-      this.prisma.usuario.update({
-        where: { id: usuarioId },
-        data: { ativo: false, refreshToken: null },
+  contarPendencias(id: string) {
+    return Promise.all([
+      this.prisma.animal.count({ where: { ongId: id, status: 'EM_PROCESSO' } }),
+      this.prisma.acompanhamento.count({
+        where: {
+          status: { not: STATUS_ACOMPANHAMENTO.REALIZADO },
+          adocao: { animal: { ongId: id } },
+        },
       }),
     ]);
   }
+
+  desativar(id: string, usuarioId: string) {
+    return this.prisma.usuario.updateMany({
+      where: { OR: [{ id: usuarioId }, { ongId: id }] },
+      data: { ativo: false, refreshToken: null },
+    });
+  }
+
 }

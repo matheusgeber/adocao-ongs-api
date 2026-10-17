@@ -25,6 +25,8 @@ export class OngService {
       cidade: filtros.cidade
         ? { contains: filtros.cidade, mode: 'insensitive' }
         : undefined,
+      usuario: { ativo: true },
+
     };
     const [dados, total] = await Promise.all([
       this.ongRepository.findMany(where, paginar(filtros)),
@@ -65,15 +67,22 @@ export class OngService {
 
   async remover(id: string) {
     const ong = await this.buscarPorId(id);
-    const vinculos = await this.ongRepository.contarVinculos(id);
-    if (
-      vinculos &&
-      (vinculos._count.animais > 0 || vinculos._count.abrigos > 0)
-    ) {
+    if (!ong.usuario.ativo) throw new ConflictException('A ONG já está desativada');
+
+    const [animaisEmProcesso, acompanhamentosPendentes] =
+      await this.ongRepository.contarPendencias(id);
+    if (animaisEmProcesso > 0) {
       throw new ConflictException(
-        'A ONG possui animais ou abrigos cadastrados',
+        `A ONG possui ${animaisEmProcesso} animal(is) em processo de adoção`,
       );
     }
-    await this.ongRepository.excluir(id, ong.usuarioId);
+    if (acompanhamentosPendentes > 0) {
+      throw new ConflictException(
+        `A ONG possui ${acompanhamentosPendentes} acompanhamento(s) pós-adoção pendente(s)`,
+      );
+    }
+
+    await this.ongRepository.desativar(id, ong.usuarioId);
   }
+
 }
