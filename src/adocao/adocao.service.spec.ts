@@ -14,7 +14,14 @@ const ong = { id: 'ong-1', perfil: Perfil.ONG, ongId: 'ong-1' };
 const usuarioAdotante = { id: 'user-1', perfil: Perfil.ADOTANTE, ongId: null };
 
 const adotante = { id: 'adotante-1', bloqueado: false };
-const animal = { id: 'animal-1', status: 'DISPONIVEL', porte: 'MEDIO', ongId: 'ong-1' };
+const animal = {
+  id: 'animal-1',
+  status: 'DISPONIVEL',
+  porte: 'MEDIO',
+  especie: 'CAO',
+  idadeMeses: 24,
+  ongId: 'ong-1',
+};
 const questionario = (pontuacao: number, diasAtras = 10) => ({
   pontuacao,
   dataResposta: new Date(Date.now() - diasAtras * 24 * 60 * 60 * 1000),
@@ -25,6 +32,7 @@ describe('AdocaoService', () => {
   const repository = {
     buscarAdotantePorUsuario: vi.fn(),
     buscarAnimal: vi.fn(),
+    buscarVacinas: vi.fn(),
     ultimoQuestionario: vi.fn(),
     contarAtivasDoAdotante: vi.fn(),
     contarAcompanhamentosVencidos: vi.fn(),
@@ -43,6 +51,7 @@ describe('AdocaoService', () => {
     vi.clearAllMocks();
     repository.buscarAdotantePorUsuario.mockResolvedValue(adotante);
     repository.buscarAnimal.mockResolvedValue(animal);
+    repository.buscarVacinas.mockResolvedValue([{ descricao: 'V10 e Antirrábica' }]);
     repository.ultimoQuestionario.mockResolvedValue(questionario(80));
     repository.contarAtivasDoAdotante.mockResolvedValue(0);
     repository.contarAcompanhamentosVencidos.mockResolvedValue(0);
@@ -73,12 +82,42 @@ describe('AdocaoService', () => {
       await expect(service.solicitar(dto, usuarioAdotante)).rejects.toThrow(ConflictException);
     });
 
+    it('não deixa adotar animal com menos de 6 meses', async () => {
+      repository.buscarAnimal.mockResolvedValue({ ...animal, idadeMeses: 5 });
+      await expect(service.solicitar(dto, usuarioAdotante)).rejects.toThrow(
+        UnprocessableEntityException,
+      );
+    });
+
+    it('exige as vacinas obrigatórias da espécie', async () => {
+      repository.buscarVacinas.mockResolvedValue([{ descricao: 'V10' }]);
+      await expect(service.solicitar(dto, usuarioAdotante)).rejects.toThrow(
+        /antirrábica/,
+      );
+
+      repository.buscarVacinas.mockResolvedValue([]);
+      await expect(service.solicitar(dto, usuarioAdotante)).rejects.toThrow(
+        UnprocessableEntityException,
+      );
+    });
+
+    it('aceita vacinas escritas em registros separados e sem acento', async () => {
+      repository.buscarVacinas.mockResolvedValue([{ descricao: 'v10' }, { descricao: 'ANTIRRABICA' }]);
+      await expect(service.solicitar(dto, usuarioAdotante)).resolves.toBeDefined();
+    });
+
+    it('não exige vacina de espécie sem lista obrigatória', async () => {
+      repository.buscarAnimal.mockResolvedValue({ ...animal, especie: 'COELHO' });
+      repository.buscarVacinas.mockResolvedValue([]);
+      await expect(service.solicitar(dto, usuarioAdotante)).resolves.toBeDefined();
+    });
+
     it('não deixa adotante bloqueado pedir', async () => {
       repository.buscarAdotantePorUsuario.mockResolvedValue({ ...adotante, bloqueado: true });
       await expect(service.solicitar(dto, usuarioAdotante)).rejects.toThrow(ForbiddenException);
     });
 
-    it('bloqueia quem tem acompanhamento vencido mesmo antes do job rodar', async () => {
+    it('bloqueia quem tem acompanhamento vencido  antes do job rodar', async () => {
       repository.contarAcompanhamentosVencidos.mockResolvedValue(1);
       await expect(service.solicitar(dto, usuarioAdotante)).rejects.toThrow(ForbiddenException);
     });

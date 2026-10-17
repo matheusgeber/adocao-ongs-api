@@ -17,7 +17,6 @@ export class AcompanhamentoRepository {
     const where: Prisma.AcompanhamentoWhereInput = { adocao: escopoAdocao(usuario) };
     if (filtros.status) where.status = filtros.status;
 
-    // atrasado = passou da data prevista e ninguém registrou
     const vencido = { dataRealizada: null, dataPrevista: { lt: new Date() } };
     if (filtros.atrasado === true) Object.assign(where, vencido);
     if (filtros.atrasado === false) where.NOT = vencido;
@@ -54,7 +53,6 @@ export class AcompanhamentoRepository {
     return this.prisma.acompanhamento.update({ where: { id }, data, include: incluir });
   }
 
-  // passou da data prevista e ninguém registrou
   buscarVencidos() {
     return this.prisma.acompanhamento.findMany({
       where: {
