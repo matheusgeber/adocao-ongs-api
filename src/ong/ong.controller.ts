@@ -69,7 +69,10 @@ export class OngController {
   @ApiBearerAuth()
   @Roles('ADMIN')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Exclui a ONG e desativa o usuário responsável' })
+  @ApiOperation({
+    summary:
+      'Desativa a ONG (exclusão lógica) se não houver adoções em andamento',
+  })
   remover(@Param('id', ParseUUIDPipe) id: string) {
     return this.ongService.remover(id);
   }
