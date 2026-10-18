@@ -117,13 +117,19 @@ export class QuestionariosService {
     const evento = new QuestionarioRevisadoEvent();
     evento.questionarioId = id;
     evento.adotanteId = questionario.adotanteId;
-    evento.pontuacao = dadosRevisao.pontuacao; this.eventEmitter.emit('questionario.revisado', evento);
+    evento.pontuacao = dadosRevisao.pontuacao;
+    this.eventEmitter.emit('questionario.revisado', evento);
 
     return questionarioAtualizado;
   }
 
   async remove(id: string) {
     await this.findOne(id);
+
+    await this.prisma.resposta.deleteMany({
+      where: { questionarioId: id },
+    });
+
     return this.questionariosRepository.delete(id);
   }
 }
