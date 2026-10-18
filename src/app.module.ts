@@ -14,9 +14,12 @@ import { VisitaModule } from './visita/visita.module.js';
 import { AcompanhamentoModule } from './acompanhamento/acompanhamento.module.js';
 import { PerguntasModule } from './perguntas/perguntas.module.js';
 import { QuestionariosModule } from './questionarios/questionarios.module.js';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+
 
 @Module({
   imports: [
+    EventEmitterModule.forRoot(),
     UsuarioModule,
     OngModule,
     AdotanteModule,

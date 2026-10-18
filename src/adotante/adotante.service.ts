@@ -1,13 +1,17 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { CreateAdotanteDto } from './dto/create-adotante.dto.js';
 import { ListarAdotantesDto } from './dto/listar-adotantes.dto.js';
 import { AdotanteRepository } from './adotante.repository.js';
 import { Prisma } from '@prisma/client';
 import { paginar, respostaPaginada } from '../common/dto/paginacao.dto.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { QuestionarioRevisadoEvent } from '../questionarios/questionario-revisado.event.js';
+import { OnEvent } from '@nestjs/event-emitter';
 
 @Injectable()
 export class AdotanteService {
+  private readonly logger = new Logger(AdotanteService.name);
+
   constructor(private prisma: PrismaService, private readonly adotanteRepository: AdotanteRepository) { }
 
   async create(createAdotanteDto: CreateAdotanteDto) {
@@ -73,4 +77,16 @@ export class AdotanteService {
       where: { id },
     });
   }
+
+  @OnEvent('questionario.revisado')
+  async handleQuestionarioRevisadoEvent(evento: QuestionarioRevisadoEvent) {
+    this.logger.log(`Evento recebido! Atualizando adotante ${evento.adotanteId} com ${evento.pontuacao} pontos.`);
+
+    await this.adotanteRepository.update(evento.adotanteId, {
+      pontuacaoQuestionario: evento.pontuacao,
+    });
+
+    this.logger.log(`Pontuação do adotante atualizada com sucesso!`);
+  }
+
 }

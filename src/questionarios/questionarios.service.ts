@@ -6,10 +6,12 @@ import { RevisarQuestionarioDto } from './dto/revisar-questionario.dto.js';
 import { Prisma } from '@prisma/client';
 import { paginar, respostaPaginada } from '../common/dto/paginacao.dto.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { QuestionarioRevisadoEvent } from './questionario-revisado.event.js';
 
 @Injectable()
 export class QuestionariosService {
-  constructor(private prisma: PrismaService, private readonly questionariosRepository: QuestionariosRepository) { }
+  constructor(private prisma: PrismaService, private readonly questionariosRepository: QuestionariosRepository, private readonly eventEmitter: EventEmitter2) { }
 
   async create(createQuestionarioDto: CreateQuestionarioDto) {
 
@@ -106,13 +108,18 @@ export class QuestionariosService {
   }
 
   async revisar(id: string, dadosRevisao: RevisarQuestionarioDto) {
-    await this.findOne(id);
+    const questionario = await this.findOne(id);
 
-    return this.questionariosRepository.update(id, {
-      pontuacao: dadosRevisao.pontuacao,
-      observacaoOng: dadosRevisao.observacaoOng,
-      revisado: true,
+    const questionarioAtualizado = await this.questionariosRepository.update(id, {
+      pontuacao: dadosRevisao.pontuacao, observacaoOng: dadosRevisao.observacaoOng, revisado: true,
     });
+
+    const evento = new QuestionarioRevisadoEvent();
+    evento.questionarioId = id;
+    evento.adotanteId = questionario.adotanteId;
+    evento.pontuacao = dadosRevisao.pontuacao; this.eventEmitter.emit('questionario.revisado', evento);
+
+    return questionarioAtualizado;
   }
 
   async remove(id: string) {
