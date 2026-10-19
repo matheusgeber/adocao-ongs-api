@@ -72,4 +72,18 @@ export class UsuarioRepository {
   async ongExiste(id: string) {
     return (await this.prisma.ong.count({ where: { id } })) > 0;
   }
+
+  incrementarTentativasLogin(id: string) {
+    return this.prisma.usuario.update({
+      where: { id },
+      data: { tentativasLogin: { increment: 1 } },
+      select: { tentativasLogin: true },
+    });
+  }
+
+  contarAdminsAtivos() {
+    return this.prisma.usuario.count({
+      where: { perfil: 'ADMIN', ativo: true },
+    });
+  }
 }

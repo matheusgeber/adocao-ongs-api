@@ -1,5 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { Perfil, Prisma, StatusAdocao, StatusAnimal, TipoAcompanhamento } from '@prisma/client';
+import {
+  Perfil,
+  Prisma,
+  StatusAdocao,
+  StatusAnimal,
+  TipoAcompanhamento,
+  TipoRegistroSaude,
+} from '@prisma/client';
 import { DIAS_POR_TIPO, somarDias } from '../acompanhamento/prazos.js';
 import { paginar } from '../common/dto/paginacao.dto.js';
 import type { UsuarioAutenticado } from '../common/interfaces/usuario-autenticado.interface.js';
@@ -11,7 +18,7 @@ type Db = Prisma.TransactionClient | PrismaService;
 
 const incluir = { animal: true, adotante: true };
 
-// o que cada perfil pode enxergar (visita e acompanhamento reaproveitam)
+// filtro por perfil
 export function escopoAdocao(usuario: UsuarioAutenticado): Prisma.AdocaoWhereInput {
   if (usuario.perfil === Perfil.ADMIN) return {};
   if (usuario.perfil === Perfil.ADOTANTE) return { adotante: { usuarioId: usuario.id } };
@@ -48,6 +55,13 @@ export class AdocaoRepository {
     return db.animal.findUnique({ where: { id } });
   }
 
+  buscarVacinas(animalId: string) {
+    return this.prisma.registroSaude.findMany({
+      where: { animalId, tipo: TipoRegistroSaude.VACINA },
+      select: { descricao: true },
+    });
+  }
+
   buscarAdotantePorUsuario(usuarioId: string) {
     return this.prisma.adotante.findUnique({ where: { usuarioId } });
   }
@@ -68,7 +82,7 @@ export class AdocaoRepository {
     });
   }
 
-  // só muda se o animal ainda estiver disponível (evita duas solicitações ao mesmo tempo)
+  // só reserva se ainda estiver disponível
   async reservarAnimal(id: string, db: Db = this.prisma) {
     const { count } = await db.animal.updateMany({
       where: { id, status: StatusAnimal.DISPONIVEL },
@@ -89,7 +103,6 @@ export class AdocaoRepository {
     return db.animal.update({ where: { id }, data: { status } });
   }
 
-  // 30 e 90 dias depois da conclusão
   criarAcompanhamentos(adocaoId: string, dataConclusao: Date, db: Db = this.prisma) {
     return db.acompanhamento.createMany({
       data: (Object.keys(DIAS_POR_TIPO) as TipoAcompanhamento[]).map((tipo) => ({
@@ -114,7 +127,6 @@ export class AdocaoRepository {
     return this.prisma.visita.count({ where: { adocaoId, status: STATUS_VISITA.REALIZADA } });
   }
 
-  // quando uma é aprovada, as outras que estavam na fila do mesmo animal caem
   rejeitarOutrasEmAnalise(animalId: string, ignorarId: string, db: Db = this.prisma) {
     return db.adocao.updateMany({
       where: { animalId, id: { not: ignorarId }, status: StatusAdocao.EM_ANALISE },
@@ -122,7 +134,6 @@ export class AdocaoRepository {
     });
   }
 
-  // outras solicitações em aberto pro mesmo animal
   contarAtivasDoAnimal(animalId: string, ignorarId: string, db: Db = this.prisma) {
     return db.adocao.count({
       where: {

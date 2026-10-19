@@ -8,4 +8,4 @@ import { OngRepository } from './ong.repository.js';
   providers: [OngService, OngRepository],
   exports: [OngService, OngRepository],
 })
-export class OngModule { }
+export class OngModule {}

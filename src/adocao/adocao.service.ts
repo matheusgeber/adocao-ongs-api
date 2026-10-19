@@ -6,6 +6,11 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { Perfil, PorteAnimal, StatusAdocao, StatusAnimal } from '@prisma/client';
+import {
+  IDADE_MINIMA_MESES,
+  normalizar,
+  vacinasObrigatorias,
+} from '../animal/regras/vacinas-obrigatorias.js';
 import { respostaPaginada } from '../common/dto/paginacao.dto.js';
 import type { UsuarioAutenticado } from '../common/interfaces/usuario-autenticado.interface.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -61,10 +66,12 @@ export class AdocaoService {
     if (animal.status !== StatusAnimal.DISPONIVEL) {
       throw new ConflictException('Esse animal não está disponível para adoção');
     }
+    await this.validarSaudeDoAnimal(animal);
+
     if (adotante.bloqueado) {
       throw new ForbiddenException('Você está bloqueado para novas adoções');
     }
-    // acompanhamento vencido e sem registro também bloqueia, mesmo se o job ainda não rodou
+    // vencido sem registro também bloqueia, mesmo antes do job rodar
     if ((await this.repository.contarAcompanhamentosVencidos(adotante.id)) > 0) {
       throw new ForbiddenException(
         'Você tem um acompanhamento atrasado e não pode solicitar novas adoções',
@@ -108,7 +115,6 @@ export class AdocaoService {
       throw new ConflictException('Só dá pra aprovar depois de uma visita realizada');
     }
 
-    // tudo ou nada: se uma das partes falhar, nada muda
     return this.prisma.$transaction(async (tx) => {
       const aprovada = await this.repository.atualizarStatus(
         id,
@@ -150,7 +156,7 @@ export class AdocaoService {
     return this.encerrar(adocao, StatusAdocao.CANCELADA);
   }
 
-  // rejeitar e cancelar: o animal volta a ficar disponível se ninguém mais estiver na fila
+  // o animal volta a ficar disponível se não houver outra solicitação
   private async encerrar(adocao: AdocaoCompleta, novoStatus: StatusAdocao) {
     this.validarTransicao(adocao.status, novoStatus);
 
@@ -162,6 +168,26 @@ export class AdocaoService {
       }
       return atualizada;
     });
+  }
+
+  private async validarSaudeDoAnimal(animal: { id: string; especie: string; idadeMeses: number }) {
+    if (animal.idadeMeses < IDADE_MINIMA_MESES) {
+      throw new UnprocessableEntityException(
+        `O animal precisa ter pelo menos ${IDADE_MINIMA_MESES} meses para ser adotado`,
+      );
+    }
+
+    const obrigatorias = vacinasObrigatorias(animal.especie);
+    if (obrigatorias.length === 0) return;
+
+    const registros = await this.repository.buscarVacinas(animal.id);
+    const aplicadas = normalizar(registros.map((r) => r.descricao).join(' '));
+    const faltando = obrigatorias.filter((vacina) => !aplicadas.includes(normalizar(vacina)));
+    if (faltando.length > 0) {
+      throw new UnprocessableEntityException(
+        `O animal ainda não tem as vacinas obrigatórias: ${faltando.join(', ')}`,
+      );
+    }
   }
 
   private async buscarOuFalhar(id: string) {

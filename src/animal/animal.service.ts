@@ -1,4 +1,4 @@
-import { ConflictException, ForbiddenException, Injectable, NotFoundException, UnprocessableEntityException,} from '@nestjs/common';
+import { ConflictException, ForbiddenException, Injectable, NotFoundException, UnprocessableEntityException, } from '@nestjs/common';
 import { Perfil, TipoRegistroSaude } from '@prisma/client';
 import { AnimalRepository } from './animal.repository.js';
 import { CreateAnimalDto } from './dto/create-animal.dto.js';
@@ -6,14 +6,13 @@ import { UpdateAnimalDto } from './dto/update-animal.dto.js';
 import { TransferirAnimalDto } from './dto/transferir-animal.dto.js';
 import { ListAnimalDto } from './dto/list-animal.dto.js';
 import { StatusAnimal } from './entities/animal.entity.js';
-import {
-  IDADE_MINIMA_MESES,
-  normalizar,
-  vacinasObrigatorias,
-} from './regras/vacinas-obrigatorias.js';
+import { IDADE_MINIMA_MESES, normalizar, vacinasObrigatorias } from './regras/vacinas-obrigatorias.js';
 import type { UsuarioAutenticado } from '../common/interfaces/usuario-autenticado.interface.js';
 import { OngRepository } from '../ong/ong.repository.js';
 import { AbrigoRepository } from '../abrigo/abrigo.repository.js';
+import { Inject } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import type { Cache } from 'cache-manager';
 
 @Injectable()
 export class AnimalService {
@@ -21,7 +20,8 @@ export class AnimalService {
     private readonly animalRepository: AnimalRepository,
     private readonly ongRepository: OngRepository,
     private readonly abrigoRepository: AbrigoRepository,
-  ) {}
+    @Inject(CACHE_MANAGER) private readonly cache: Cache,
+  ) { }
 
   async findAll(dto: ListAnimalDto) {
     const { dados, total } = await this.animalRepository.findMany(dto);
@@ -37,7 +37,9 @@ export class AnimalService {
   async create(dto: CreateAnimalDto, usuario: UsuarioAutenticado) {
     const ongId = await this.ongIdDoUsuario(usuario);
     if (dto.abrigoId) await this.garantirCapacidade(dto.abrigoId, ongId);
-    return this.animalRepository.create({ ...dto, ongId });
+    const animal = await this.animalRepository.create({ ...dto, ongId });
+    await this.limparCache();
+    return animal;
   }
 
   async update(id: string, dto: UpdateAnimalDto, usuario: UsuarioAutenticado) {
@@ -46,7 +48,9 @@ export class AnimalService {
     if (dto.status === StatusAnimal.DISPONIVEL) {
       this.garantirAptoParaAdocao(animal);
     }
-    return this.animalRepository.update(id, dto);
+    const atualizado = await this.animalRepository.update(id, dto);
+    await this.limparCache();
+    return atualizado;
   }
 
   async transferir(
@@ -60,7 +64,11 @@ export class AnimalService {
     if (animal.abrigoId !== dto.abrigoId) {
       await this.garantirCapacidade(dto.abrigoId, animal.ongId);
     }
-    return this.animalRepository.update(id, { abrigoId: dto.abrigoId });
+    const transferido = await this.animalRepository.update(id, {
+      abrigoId: dto.abrigoId,
+    });
+    await this.limparCache();
+    return transferido;
   }
 
   async remove(id: string, usuario: UsuarioAutenticado) {
@@ -70,6 +78,7 @@ export class AnimalService {
     }
     this.garantirNaoEmProcesso(animal.status, 'excluído');
     await this.animalRepository.delete(id);
+    await this.limparCache();
   }
 
   private async garantirCapacidade(abrigoId: string, ongIdDoAnimal: string) {
@@ -136,5 +145,9 @@ export class AnimalService {
     if (ongId !== ongIdDoAnimal) {
       throw new ForbiddenException('Este animal pertence a outra ONG');
     }
+  }
+
+  private async limparCache() {
+    await this.cache.clear();
   }
 }

@@ -1,42 +1,79 @@
 import {
   Controller,
   Get,
-  Post,
-  Body,
-  Patch,
   Param,
+  ParseUUIDPipe,
+  Query,
+  UseGuards,
+  Body,
   Delete,
+  HttpCode,
+  HttpStatus,
+  Patch,
+  Post,
 } from '@nestjs/common';
+import { ApiOperation, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard.js';
+import { RolesGuard } from '../common/guards/roles.guard.js';
+import { Publico, Roles } from '../common/decorators/roles.decorator.js';
 import { OngService } from './ong.service.js';
+import { ListarOngsDto } from './dto/listar-ongs.dto.js';
+import { UsuarioLogado } from '../common/decorators/usuario-logado.decorator.js';
+import type { UsuarioAutenticado } from '../common/interfaces/usuario-autenticado.interface.js';
 import { CreateOngDto } from './dto/create-ong.dto.js';
 import { UpdateOngDto } from './dto/update-ong.dto.js';
 
-@Controller('ong')
+@ApiTags('ONGs')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Controller('ongs')
 export class OngController {
   constructor(private readonly ongService: OngService) {}
 
-  @Post()
-  create(@Body() createOngDto: CreateOngDto) {
-    return this.ongService.create(createOngDto);
-  }
-
   @Get()
-  findAll() {
-    return this.ongService.findAll();
+  @Publico()
+  @ApiOperation({
+    summary: 'Lista ONGs com paginação e filtros por nome e cidade',
+  })
+  listar(@Query() filtros: ListarOngsDto) {
+    return this.ongService.listar(filtros);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.ongService.findOne(id);
+  @Publico()
+  @ApiOperation({ summary: 'Busca uma ONG pelo id' })
+  buscarPorId(@Param('id', ParseUUIDPipe) id: string) {
+    return this.ongService.buscarPorId(id);
+  }
+
+  @Post()
+  @ApiBearerAuth()
+  @Roles('ADMIN')
+  @ApiOperation({ summary: 'Cadastra uma ONG e o usuário responsável por ela' })
+  criar(@Body() dto: CreateOngDto) {
+    return this.ongService.criar(dto);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateOngDto: UpdateOngDto) {
-    return this.ongService.update(id, updateOngDto);
+  @ApiBearerAuth()
+  @Roles('ADMIN', 'ONG')
+  @ApiOperation({ summary: 'Atualiza a ONG (ADMIN ou a própria ONG)' })
+  atualizar(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateOngDto,
+    @UsuarioLogado() usuario: UsuarioAutenticado,
+  ) {
+    return this.ongService.atualizar(id, dto, usuario);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.ongService.remove(id);
+  @ApiBearerAuth()
+  @Roles('ADMIN')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({
+    summary:
+      'Desativa a ONG (exclusão lógica) se não houver adoções em andamento',
+  })
+  remover(@Param('id', ParseUUIDPipe) id: string) {
+    return this.ongService.remover(id);
   }
 }

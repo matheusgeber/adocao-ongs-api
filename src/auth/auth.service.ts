@@ -2,6 +2,8 @@ import {
   ConflictException,
   Injectable,
   UnauthorizedException,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
@@ -16,6 +18,14 @@ type UsuarioComOng = NonNullable<
 
 const hashToken = (token: string) =>
   createHash('sha256').update(token).digest('hex');
+const LIMITE_TENTATIVAS = 5;
+const MINUTOS_BLOQUEIO = 15;
+
+const contaBloqueada = (minutos: number) =>
+  new HttpException(
+    `Conta bloqueada por excesso de tentativas. Tente novamente em ${minutos} minuto(s)`,
+    HttpStatus.LOCKED,
+  );
 
 @Injectable()
 export class AuthService {
@@ -35,14 +45,36 @@ export class AuthService {
 
   async login(dto: LoginDto) {
     const usuario = await this.usuarioRepository.findByEmail(dto.email);
-    const senhaOk = usuario
-      ? await bcrypt.compare(dto.senha, usuario.senha)
-      : false;
+    if (!usuario) throw new UnauthorizedException('E-mail ou senha inválidos');
 
-    if (!usuario || !senhaOk)
+    if (usuario.bloqueadoAte && usuario.bloqueadoAte > new Date()) {
+      const restante = Math.ceil(
+        (usuario.bloqueadoAte.getTime() - Date.now()) / 60_000,
+      );
+      throw contaBloqueada(restante);
+    }
+
+    if (!(await bcrypt.compare(dto.senha, usuario.senha))) {
+      const { tentativasLogin } =
+        await this.usuarioRepository.incrementarTentativasLogin(usuario.id);
+      if (tentativasLogin >= LIMITE_TENTATIVAS) {
+        await this.usuarioRepository.update(usuario.id, {
+          tentativasLogin: 0,
+          bloqueadoAte: new Date(Date.now() + MINUTOS_BLOQUEIO * 60_000),
+        });
+        throw contaBloqueada(MINUTOS_BLOQUEIO);
+      }
       throw new UnauthorizedException('E-mail ou senha inválidos');
+    }
+
     if (!usuario.ativo) throw new UnauthorizedException('Usuário desativado');
 
+    if (usuario.tentativasLogin > 0 || usuario.bloqueadoAte) {
+      await this.usuarioRepository.update(usuario.id, {
+        tentativasLogin: 0,
+        bloqueadoAte: null,
+      });
+    }
     return this.gerarTokens(usuario);
   }
 
