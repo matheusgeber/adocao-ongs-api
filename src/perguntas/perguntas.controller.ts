@@ -3,12 +3,13 @@ import { PerguntasService } from './perguntas.service.js';
 import { CreatePerguntaDto } from './dto/create-pergunta.dto.js';
 import { ListarPerguntasDto } from './dto/listar-perguntas.dto.js';
 import { UpdatePerguntaDto } from './dto/update-pergunta.dto.js';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../common/guards/roles.guard.js';
 import { Roles } from '../common/decorators/roles.decorator.js';
 import { Perfil } from '@prisma/client';
 
+@ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
 @ApiTags('Perguntas')
 @Controller('perguntas')

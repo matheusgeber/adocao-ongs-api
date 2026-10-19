@@ -9,6 +9,7 @@ import { Roles } from '../common/decorators/roles.decorator.js';
 import { Perfil } from '@prisma/client';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../common/guards/roles.guard.js';
+import { UpdateAdotanteDto } from './dto/update-adotante.dto.js';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @ApiTags('Adotantes')
@@ -19,7 +20,7 @@ export class AdotanteController {
 
   @Post()
   @ApiOperation({ summary: 'Cadastra um novo adotante no sistema.' })
-  @Roles(Perfil.ADMIN, Perfil.ONG)
+  @Roles(Perfil.ADOTANTE, Perfil.ADMIN)
   create(@Body() createAdotanteDto: CreateAdotanteDto) {
     return this.adotanteService.create(createAdotanteDto);
   }
@@ -47,8 +48,9 @@ export class AdotanteController {
   @Patch(':id')
   @ApiOperation({ summary: 'Atualiza os dados de perfil de um adotante.' })
   @Roles(Perfil.ADMIN, Perfil.ADOTANTE)
-  update(@Param('id') id: string, @Body() updateAdotanteDto: Partial<CreateAdotanteDto>, @UsuarioLogado() usuario: UsuarioAutenticado) {
-    if (usuario.perfil === Perfil.ADOTANTE && usuario.id !== id) {
+  async update(@Param('id') id: string, @Body() updateAdotanteDto: UpdateAdotanteDto, @UsuarioLogado() usuario: UsuarioAutenticado) {
+    const adotante = await this.adotanteService.findOne(id);
+    if (usuario.perfil === Perfil.ADOTANTE && adotante.usuarioId !== usuario.id) {
       throw new ForbiddenException('Não pode alterar os dados de outro adotante.');
     }
     return this.adotanteService.update(id, updateAdotanteDto);

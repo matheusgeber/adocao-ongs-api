@@ -3,7 +3,7 @@ import { QuestionariosService } from './questionarios.service.js';
 import { CreateQuestionarioDto } from './dto/create-questionario.dto.js';
 import { ListarQuestionariosDto } from './dto/listar-questionarios.dto.js';
 import { RevisarQuestionarioDto } from './dto/revisar-questionario.dto.js';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../common/guards/roles.guard.js';
 import { Roles } from '../common/decorators/roles.decorator.js';
@@ -11,6 +11,7 @@ import { Perfil } from '@prisma/client';
 import { UsuarioLogado } from '../common/decorators/usuario-logado.decorator.js';
 import type { UsuarioAutenticado } from '../common/interfaces/usuario-autenticado.interface.js';
 
+@ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
 @ApiTags('Questionários')
 @Controller('questionarios')
